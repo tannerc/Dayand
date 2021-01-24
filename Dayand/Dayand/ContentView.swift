@@ -11,9 +11,9 @@ import CoreData
 
 struct ContentView: View {
     @Environment(\.openURL) var openURL
-    @Environment(\.managedObjectContext) var managedObjectContext
+    @Environment(\.managedObjectContext) var moc
     
-    @FetchRequest(entity: EntryObject.entity(), sortDescriptors: []) var entryObjects: FetchedResults<EntryObject>
+    @FetchRequest(entity: Dataobject.entity(), sortDescriptors: []) var entries: FetchedResults<Dataobject>
 
     @State var entryString: String = ""
     @State private var entrySubmitted = false
@@ -25,14 +25,14 @@ struct ContentView: View {
         }()
     
     var body: some View {
-        
-        VStack {
-            List {
-                ForEach(entryObjects, id: \.id) { (entryObject: EntryObject) in
-                    Text(entryObject.message ?? "Unknown")
-                }
-            }
-        }
+//
+//        VStack {
+//            List {
+//                ForEach(entries, id: \.id) { (entryObject: Dataobject) in
+//                    Text(entryObject.message ?? "Not found")
+//                }
+//            }
+//        }
         
         ZStack {
             VStack(alignment: .center, spacing: 0) {
@@ -43,7 +43,7 @@ struct ContentView: View {
                     
                     // Display today's date. Feels redundant since this is a status bar app and the date is often displayed?
                     
-                    Text(ContentView.entryDateFormat.string(from: Date()))
+                    Text(ContentView.entryDateFormat.string(from: Date()) + " · 12 entries")
                         .font(.callout)
                         .fontWeight(.regular)
                         .foregroundColor(Color(.secondaryLabelColor))
@@ -206,6 +206,8 @@ struct ContentView: View {
     func LogEntry(textEntry: String, response: Int) {
         entrySubmitted = true
         
+        print("test")
+        
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
         let logDate = dateFormatter.string(from: Date())
@@ -216,13 +218,13 @@ struct ContentView: View {
         print("Would log \(textEntry) with response \(response) for \(logDate) \(logTime)")
         entryString = ""
         
-        let entry = EntryObject(context: self.managedObjectContext)
+        let entry = Dataobject(context: self.moc)
         entry.id = UUID()
         entry.date = Int16(logDate) ?? 0
         entry.time = Int16(logTime) ?? 0
         entry.response = Int16(response)
         entry.message = textEntry
-        try? self.managedObjectContext.save()
+        try? self.moc.save()
         
         // Animate everything out, but do it carefully for reasons
         

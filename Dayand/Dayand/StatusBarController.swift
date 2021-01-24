@@ -57,6 +57,7 @@ class StatusBarController {
                 } else {
                     self.popover.show(relativeTo: positioningView.bounds, of: positioningView, preferredEdge: .maxY)
                     statusBarButton.bounds = statusBarButton.bounds.offsetBy(dx: 0, dy: statusBarButton.bounds.height)
+                    
                     self.popover.contentViewController?.view.window?.becomeKey()
                     
                     if let popoverWindow = popover.contentViewController?.view.window {
@@ -65,8 +66,6 @@ class StatusBarController {
                 }
             }
             
-            
-//            popover.show(relativeTo: statusBarButton.bounds, of: statusBarButton, preferredEdge: NSRectEdge.maxY)
             clickMonitor?.start()
         }
     }

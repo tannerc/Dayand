@@ -7,6 +7,7 @@
 
 import Cocoa
 import SwiftUI
+import CoreData
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -14,12 +15,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
     var popover = NSPopover.init()
     var statusBar: StatusBarController?
-
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Create the SwiftUI view that provides the window contents.
-        let contentView = ContentView()
+        
+        let contentView = ContentView().environment(\.managedObjectContext, persistentContainer.viewContext)
         
         popover.contentViewController = MainViewController()
+        
         popover.contentSize = NSSize(width: 400, height: 170)
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(rootView: contentView)
@@ -33,7 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // MARK: - Core Data stack
 
-    lazy var persistentContainer: NSPersistentContainer = {
+    var persistentContainer: NSPersistentContainer = {
         /*
          The persistent container for the application. This implementation
          creates and returns a container, having loaded the store for the
