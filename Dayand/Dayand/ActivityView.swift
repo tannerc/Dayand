@@ -1,8 +1,8 @@
 //
-//  SettingsView.swift
+//  ActivityView.swift
 //  Dayand
 //
-//  Created by Tanner Christensen on 1/23/21.
+//  Created by Tanner Christensen on 1/25/21.
 //
 
 import Foundation
@@ -10,9 +10,12 @@ import SwiftUI
 import CoreData
 import UserNotifications
 
-struct SettingsView: View {
+struct ActivityView: View {
     @Environment(\.managedObjectContext) var moc
-    @FetchRequest(entity: Dataobject.entity(), sortDescriptors: []) var entries: FetchedResults<Dataobject>
+    @FetchRequest(entity: Dataobject.entity(),
+                  sortDescriptors:
+                    [NSSortDescriptor(keyPath: \Dataobject.logdate, ascending: false)]
+    ) var entries: FetchedResults<Dataobject>
     
     @State var colorSyncFormat = UserDefaults.standard.string(forKey: "superbcolorcopyformat")
     
@@ -21,7 +24,7 @@ struct SettingsView: View {
     var body: some View {
         VStack(alignment: .leading) {
             
-            Text("Settings")
+            Text("Activity")
                 .font(.largeTitle)
                 .fontWeight(.semibold)
                 .foregroundColor(Color(.textColor))
@@ -29,43 +32,12 @@ struct SettingsView: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 20) {
                     
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Copy colors in this format").font(.caption)
-                        
-                        MenuButton("\(colorSyncFormat ?? "Hex value")") {
-                            Button(action: {
-                                ChangeColorCopyFormat(toValue: "Hex value")
-                                self.colorSyncFormat = UserDefaults.standard.string(forKey: "superbcolorcopyformat")
-                            }) {
-                                Text("Hex value")
-                            }
-                            
-                            Button(action: {
-                                ChangeColorCopyFormat(toValue: "RGB value")
-                                self.colorSyncFormat = UserDefaults.standard.string(forKey: "superbcolorcopyformat")
-                            }) {
-                                Text("RGB value")
-                            }
-                            
-                            Button(action: {
-                                ChangeColorCopyFormat(toValue: "Color name")
-                                self.colorSyncFormat = UserDefaults.standard.string(forKey: "superbcolorcopyformat")
-                            }) {
-                                Text("Color name")
-                            }
-                        }.frame(width: 140).shadow(color: Color(.lightGray).opacity(0.2), radius: 2, x: 0, y: 3)
-                    }
-                    
-                    Button(action: {
-                        DeleteAllEntries()
-                    }) {
-                        Text("Clear " + GetAllEntries())
-                    }.disabled(entries.count > 0 ? false : true)
-                    
-                    Button(action: {
-                        DisplayNotification()
-                    }) {
-                        Text("Do notification!")
+                    List {
+                        ForEach(entries, id: \.self) { (loggedentry: Dataobject) in
+                            Text(loggedentry.message ?? "No message")
+                            Text(String(loggedentry.response))
+                            Text(String(loggedentry.date))
+                        }
                     }
 
                     Spacer()
@@ -164,34 +136,8 @@ struct SettingsView: View {
     }
 }
 
-func ChangeColorCopyFormat(toValue: String) {
-    UserDefaults.standard.set(toValue, forKey: "superbcolorcopyformat")
-}
-
-struct DayandButton: View {
-    let title: String
-    let action: () -> Void
-    let backgroundColor: Color
-    let disabledState: Bool
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .padding(.vertical, 12.0)
-                .padding(.horizontal, 20.0)
-                .foregroundColor(.white)
-                .background(backgroundColor)
-                .cornerRadius(8)
-                .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
-        }
-        .disabled(disabledState)
-    }
-}
-
-struct SettingsView_Previews: PreviewProvider {
+struct ActivityView_Previews: PreviewProvider {
     static var previews: some View {
-        SettingsView().environment(\.colorScheme, .light)
+        ActivityView().environment(\.colorScheme, .light)
     }
 }

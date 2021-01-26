@@ -8,9 +8,10 @@
 import Cocoa
 import SwiftUI
 import CoreData
+import UserNotifications
 
 @main
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     
     var statusItem: NSStatusItem?
     var popover = NSPopover.init()
@@ -22,12 +23,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let contentView = ContentView().environment(\.managedObjectContext, persistentContainer.viewContext)
         
         popover.contentViewController = MainViewController()
-        
         popover.contentSize = NSSize(width: 400, height: 170)
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(rootView: contentView)
         
         statusBar = StatusBarController.init(popover)
+        
+        // Register for notifications with actions
+        
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
+
+        let show = UNNotificationAction(identifier: "show", title: "Tell me more…", options: .foreground)
+        let category = UNNotificationCategory(identifier: "alarm", actions: [show], intentIdentifiers: [])
+
+        center.setNotificationCategories([category])
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        
+        print("Clicked on notification!")
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {

@@ -13,7 +13,11 @@ struct ContentView: View {
     @Environment(\.openURL) var openURL
     @Environment(\.managedObjectContext) var moc
     
-    @FetchRequest(entity: Dataobject.entity(), sortDescriptors: []) var entries: FetchedResults<Dataobject>
+    @FetchRequest(entity: Dataobject.entity(),
+                  sortDescriptors:
+                    [NSSortDescriptor(keyPath: \Dataobject.date, ascending: true)],
+                  predicate: NSPredicate(format: "date == \(GetTodaysDate())")
+    ) var entries: FetchedResults<Dataobject>
 
     @State var entryString: String = ""
     @State private var entrySubmitted = false
@@ -24,15 +28,16 @@ struct ContentView: View {
             return formatter
         }()
     
+    // This is the response dictionary, it can be customized to have fewer or more items, each should map to an int value for analytics.
+    
+    let responseDic = ["😡" : "0",
+                       "☹️" : "1",
+                       "😐" : "2",
+                       "🙂" : "3",
+                       "😄" : "4",
+    ]
+    
     var body: some View {
-//
-//        VStack {
-//            List {
-//                ForEach(entries, id: \.id) { (entryObject: Dataobject) in
-//                    Text(entryObject.message ?? "Not found")
-//                }
-//            }
-//        }
         
         ZStack {
             VStack(alignment: .center, spacing: 0) {
@@ -43,10 +48,10 @@ struct ContentView: View {
                     
                     // Display today's date. Feels redundant since this is a status bar app and the date is often displayed?
                     
-                    Text(ContentView.entryDateFormat.string(from: Date()) + " · 12 entries")
+                    Text(ContentView.entryDateFormat.string(from: Date()) + " · " + GetTodaysEntries())
                         .font(.callout)
                         .fontWeight(.regular)
-                        .foregroundColor(Color(.secondaryLabelColor))
+                        .foregroundColor(Color(.textColor))
                     
                     Spacer()
                     
@@ -57,7 +62,7 @@ struct ContentView: View {
                         // Button for opening the reporting view
                         
                         Button(action: {
-                            DisplaySettingsWindow()
+                            DisplayActivityWindow()
                         }) {
                             Text("View Activity Log")
                         }
@@ -85,7 +90,7 @@ struct ContentView: View {
                         }) {
                             Text("Quit")
                         }
-                    }.background(Image("SettingsImage").foregroundColor(Color(.secondaryLabelColor)).scaleEffect(0.9))
+                    }.background(Image("SettingsImage").foregroundColor(Color(.textColor)).scaleEffect(0.9))
                         .frame(width: 24, height: 24, alignment: .trailing)
                         .padding(4)
                         .menuButtonStyle(BorderlessButtonMenuButtonStyle())
@@ -96,101 +101,56 @@ struct ContentView: View {
                 
                 // Text input field. Needs to be revamped into something else to create a larger hit target and firstResponder.
                 
-                TextField("What are you doing?", text: $entryString)
+                TextField("Enter activity then select a response", text: $entryString)
                     .font(.title2)
                     .textFieldStyle(PlainTextFieldStyle())
                     .contentShape(Rectangle())
                     .frame(width: 330, height: 20)
                     .padding(20)
                     .font(.body)
-                    .foregroundColor(Color(.headerTextColor))
-                    .background(Color(.separatorColor))
-                    .cornerRadius(12)
+                    .foregroundColor(Color(.textColor))
+                    .background(Color(.textColor).opacity(0.09))
+                    .cornerRadius(6)
                     .disabled(entrySubmitted)
                 
                 
-                // Our "response" buttons are put into an HStack to create a clean layout.
-                // Buttons themselves are a bit janky due to SwiftUI issues, unfortunately.
-                // You can remove or add buttons and the remaining items will scale, mostly.
+                /*
+                 Here we're pulling from the responseDictionary to create a series of response buttons.
+                 
+                 Our response buttons are put into an HStack to create a clean layout that scales according to the number of responses listed in the responseDictionary.
+                 
+                 Buttons themselves are a bit janky due to SwiftUI issues, unfortunately.
+                */
                 
                 HStack(alignment: .center, spacing: 0) {
-                    Button(action: {
-                        LogEntry(textEntry: entryString, response: 0)
-                    }) {
-                        Text("😡")
-                            .font(.title)
-                            .contentShape(Rectangle())
-                            .padding()
-                            .frame(minWidth: 0, maxWidth: .infinity)
-                            .background(Color(.controlBackgroundColor))
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 20)
                     
-                    Button(action: {
-                        LogEntry(textEntry: entryString, response: 1)
-                    }) {
-                        Text("🙁")
-                            .font(.title)
-                            .contentShape(Rectangle())
-                            .padding()
-                            .frame(minWidth: 0, maxWidth: .infinity)
-                            .background(Color(.controlBackgroundColor))
+                    ForEach(responseDic.sorted(by: { $0.value < $1.value }), id: \.key) { key, value in
+                        Button(action: {
+                            LogEntry(textEntry: entryString, response: Int(value) ?? 0)
+                        }) {
+                            Text(key)
+                                .font(.title)
+                                .contentShape(Rectangle())
+                                .padding()
+                                .frame(minWidth: 0, maxWidth: .infinity)
+                                .background(Color(.windowBackgroundColor))
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 20)
                     }
-                    .buttonStyle(PlainButtonStyle())
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 20)
-                    
-                    Button(action: {
-                        LogEntry(textEntry: entryString, response: 2)
-                    }) {
-                        Text("😕")
-                            .font(.title)
-                            .contentShape(Rectangle())
-                            .padding()
-                            .frame(minWidth: 0, maxWidth: .infinity)
-                            .background(Color(.controlBackgroundColor))
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 20)
-                    
-                    Button(action: {
-                        LogEntry(textEntry: entryString, response: 3)
-                    }) {
-                        Text("🙂")
-                            .font(.title)
-                            .contentShape(Rectangle())
-                            .padding()
-                            .frame(minWidth: 0, maxWidth: .infinity)
-                            .background(Color(.controlBackgroundColor))
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 20)
-                    
-                    Button(action: {
-                        LogEntry(textEntry: entryString, response: 4)
-                    }) {
-                        Text("😄")
-                            .font(.title)
-                            .contentShape(Rectangle())
-                            .padding()
-                            .frame(minWidth: 0, maxWidth: .infinity)
-                            .background(Color(.controlBackgroundColor))
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .frame(minWidth: 0, maxWidth: .infinity, minHeight: 20)
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 40)
             }
             .padding(0)
             .frame(width: 400.0, height: 170.0, alignment: .top)
-            .background(Color(.controlBackgroundColor))
+            .background(Color(.windowBackgroundColor))
             
             if(entrySubmitted){
                 VStack() {
                     Text("Saved!")
                         .font(.title)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(Color(.windowBackgroundColor))
+                        .foregroundColor(Color(.highlightColor))
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
                 .background(Color(.textColor).opacity(0.7))
@@ -201,27 +161,55 @@ struct ContentView: View {
         .frame(width: 400.0, height: 170.0, alignment: .top)
     }
     
+    func GetTodaysEntries() -> String {
+        
+        if entries.isEmpty {
+            return "0 activities"
+        } else {
+            var suffixString = ""
+            
+            if entries.count == 1 {
+                suffixString = "activity"
+            } else {
+                suffixString = "activities"
+            }
+
+            return String("\(String(entries.count)) \(suffixString)")
+        }
+    }
+    
     // Function to log the entry and response.
     
     func LogEntry(textEntry: String, response: Int) {
         entrySubmitted = true
         
-        print("test")
+        // Format date
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
         let logDate = dateFormatter.string(from: Date())
+        
+        // Get separate formatter for time of day
+        
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "hhmm"
         let logTime = timeFormatter.string(from: Date())
+        
+        // Seconds don't display in the UI, but they are logged for reporting and sorting purposes
+        
+        let fullTimeFormatter = DateFormatter()
+        fullTimeFormatter.dateFormat = "yyyyMMddhhmmss"
+        let loggedTime = fullTimeFormatter.string(from: Date())
+        
         
         print("Would log \(textEntry) with response \(response) for \(logDate) \(logTime)")
         entryString = ""
         
         let entry = Dataobject(context: self.moc)
         entry.id = UUID()
-        entry.date = Int16(logDate) ?? 0
-        entry.time = Int16(logTime) ?? 0
+        entry.date = Int32(logDate) ?? 0
+        entry.time = Int32(logTime) ?? 0
+        entry.logdate = Int32(loggedTime) ?? 0
         entry.response = Int16(response)
         entry.message = textEntry
         try? self.moc.save()
@@ -234,6 +222,8 @@ struct ContentView: View {
                 entrySubmitted = false
             }
         }
+        
+        print(entries)
     }
     
     // Get build version of the app to display in the settings menu
@@ -245,27 +235,64 @@ struct ContentView: View {
             return("")
         }
     }
+    
+    // Open settings view in a new window object
+
+    func DisplaySettingsWindow() {
+        var window: NSWindow!
+        let contentView = SettingsView().environment(\.managedObjectContext, moc)
+
+        // Create the window and set the content view.
+        
+        window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 700, height: 600),
+            styleMask: [.titled, .closable],
+            backing: .buffered, defer: false)
+        window.center()
+        window.styleMask.remove(.resizable)
+        window.titlebarAppearsTransparent = true
+        window.styleMask.insert(.fullSizeContentView)
+        window.titleVisibility = .hidden
+        window.title = "Dayand Settings"
+        window.setFrameAutosaveName("Settings Window")
+        window.contentView = NSHostingView(rootView: contentView)
+        window.makeKeyAndOrderFront(window.self)
+        NSApp.activate(ignoringOtherApps: true)
+        window.isReleasedWhenClosed = false
+    }
+    
+    // Open activity view in a new window object
+
+    func DisplayActivityWindow() {
+        var window: NSWindow!
+        let contentView = ActivityView().environment(\.managedObjectContext, moc)
+
+        // Create the window and set the content view.
+        
+        window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 700, height: 625),
+            styleMask: [.titled, .closable],
+            backing: .buffered, defer: false)
+        window.center()
+        window.styleMask.remove(.resizable)
+        window.titlebarAppearsTransparent = true
+        window.styleMask.insert(.fullSizeContentView)
+        window.titleVisibility = .hidden
+        window.title = "Activity Log"
+        window.setFrameAutosaveName("Activity Window")
+        window.contentView = NSHostingView(rootView: contentView)
+        window.makeKeyAndOrderFront(window.self)
+        NSApp.activate(ignoringOtherApps: true)
+        window.isReleasedWhenClosed = false
+    }
 }
 
-// Open settings view in a new window object
-
-func DisplaySettingsWindow() {
-    var window: NSWindow!
-    let contentView = SettingsView()
-
-    // Create the window and set the content view.
+func GetTodaysDate() -> Int32 {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyyMMdd"
+    let logDate = dateFormatter.string(from: Date())
     
-    window = NSWindow(
-        contentRect: NSRect(x: 0, y: 0, width: 300, height: 600),
-        styleMask: [.titled, .closable],
-        backing: .buffered, defer: false)
-    window.center()
-    window.title = "Dayand Settings"
-    window.setFrameAutosaveName("Main Window")
-    window.contentView = NSHostingView(rootView: contentView)
-    window.makeKeyAndOrderFront(window.self)
-    window.isReleasedWhenClosed = false
-    window.backgroundColor = .white
+    return Int32(logDate) ?? 00000000
 }
 
 // Override TextField ring focus since it's ugly
