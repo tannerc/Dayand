@@ -24,13 +24,14 @@ struct ActivityView: View {
     // Fetch the last n days
     
     @FetchRequest var lastndays: FetchedResults<Dataobject>
-    var daysToChart = 7
+    
+    @State private var daysToChart = 7
     
     init() {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
         let fromDate = dateFormatter.string(from: Date())
-        let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (daysToChart * -1), to: Date()) ?? Date())
+        let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (45 * -1), to: Date()) ?? Date())
         
         print("Would look for dates between \(toDate) and \(fromDate)")
         
@@ -57,9 +58,29 @@ struct ActivityView: View {
     var body: some View {
         VStack(alignment: .leading) {
             
+            HStack(alignment: .center) {
+                Spacer()
+                
+                Menu {
+                    Button(action: {daysToChart = 7}, label: {
+                        Text("7 days")
+                    })
+                    Button(action: {daysToChart = 14}, label: {
+                        Text("14 days")
+                    })
+                    Button(action: {daysToChart = 28}, label: {
+                        Text("28 days")
+                    })
+                } label: {
+                    Text("\(daysToChart) days")
+                }
+                .frame(width: 100)
+                .padding()
+            }
+            
             // Chart view will go here
             
-            ParseLastNEntries()
+            ChartNEntries()
             
             // List view of all past data
             
@@ -80,8 +101,6 @@ struct ActivityView: View {
                 }
             }
             .padding(.bottom, 12)
-            
-            // Controls
             
             Spacer()
         }.padding(.top, 20)
@@ -119,7 +138,7 @@ struct ActivityView: View {
         }
     }
     
-    func ParseLastNEntries() -> ChartUIView {
+    func ChartNEntries() -> ChartUIView {
         
         // Update lastndaysArray to contain last "daysToChart" days
         
@@ -137,7 +156,7 @@ struct ActivityView: View {
         
         let sortedArrayKeys = Array(lastndaysArray.keys.sorted(by: <))
         
-        for index in 0...(lastndays.count-1) {
+        for index in 0...(daysToChart-1) {
             print("Checking \(lastndays[index].date)...")
             
             if(sortedArrayKeys.contains(String(lastndays[index].date))){

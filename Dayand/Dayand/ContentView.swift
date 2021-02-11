@@ -30,11 +30,11 @@ struct ContentView: View {
     
     // This is the response dictionary, it can be customized to have fewer or more items, each should map to an int value for analytics.
     
-    let responseDic = ["😡" : "0",
-                       "☹️" : "1",
-                       "😐" : "2",
-                       "🙂" : "3",
-                       "😄" : "4",
+    let responseDic = ["😡" : "1",
+                       "☹️" : "2",
+                       "😐" : "3",
+                       "🙂" : "4",
+                       "😄" : "5",
     ]
     
     var body: some View {
@@ -155,7 +155,7 @@ struct ContentView: View {
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
                 .background(Color(.textColor).opacity(0.5))
-                .animation(.easeInOut(duration: 2))
+                .animation(.easeInOut(duration: 1.3))
                 .scaleEffect()
             }
         }
