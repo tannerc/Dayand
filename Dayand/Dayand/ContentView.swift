@@ -109,7 +109,7 @@ struct ContentView: View {
                     .padding(20)
                     .font(.body)
                     .foregroundColor(Color(.textColor))
-                    .background(Color(.textColor).opacity(0.09))
+                    .background(Color(.textColor).opacity(0.04))
                     .cornerRadius(6)
                     .disabled(entrySubmitted)
                 
@@ -140,6 +140,7 @@ struct ContentView: View {
                     }
                 }
                 .padding(.horizontal, 40)
+                
             }
             .padding(0)
             .frame(width: 400.0, height: 170.0, alignment: .top)
@@ -153,7 +154,7 @@ struct ContentView: View {
                         .foregroundColor(Color(.highlightColor))
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                .background(Color(.textColor).opacity(0.7))
+                .background(Color(.textColor).opacity(0.5))
                 .animation(.easeInOut(duration: 2))
                 .scaleEffect()
             }
@@ -202,15 +203,15 @@ struct ContentView: View {
         let loggedTime = fullTimeFormatter.string(from: Date())
         
         
-        print("Would log \(textEntry) with response \(response) for \(logDate) \(logTime)")
+        print("Would log \(textEntry) with response \(response) for \(loggedTime)")
         entryString = ""
         
         let entry = Dataobject(context: self.moc)
         entry.id = UUID()
         entry.date = Int32(logDate) ?? 0
         entry.time = Int32(logTime) ?? 0
-        entry.logdate = Int32(loggedTime) ?? 0
-        entry.response = Int16(response)
+        entry.logdate = Int64(loggedTime) ?? 0
+        entry.response = Int32(response)
         entry.message = textEntry
         try? self.moc.save()
         
@@ -274,10 +275,8 @@ struct ContentView: View {
             styleMask: [.titled, .closable],
             backing: .buffered, defer: false)
         window.center()
-        window.styleMask.remove(.resizable)
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
-        window.titleVisibility = .hidden
         window.title = "Activity Log"
         window.setFrameAutosaveName("Activity Window")
         window.contentView = NSHostingView(rootView: contentView)
