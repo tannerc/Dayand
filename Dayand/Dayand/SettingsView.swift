@@ -67,6 +67,12 @@ struct SettingsView: View {
                     }) {
                         Text("Do notification!")
                     }
+                    
+                    Button(action: {
+                       UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+                    }) {
+                        Text("Clear all notifications")
+                    }
 
                     Spacer()
                 }
@@ -79,13 +85,12 @@ struct SettingsView: View {
                 Spacer()
                 
                 CustomButtonView(title: "Cancel", action: { NSApplication.shared.keyWindow?.close() }, disabledState: false, buttonClass: "Default")
-                
                 CustomButtonView(title: "Save", action: { NSApplication.shared.keyWindow?.close() }, disabledState: !changesMade, buttonClass: "Primary")
             }
             .buttonStyle(PlainButtonStyle())
         }
         .padding(20)
-        .background(Color(.highlightColor))
+        .background(Color("backgroundColor"))
     }
     
     func GetAllEntries() -> String {
@@ -144,12 +149,26 @@ struct SettingsView: View {
         let center = UNUserNotificationCenter.current()
 
         let content = UNMutableNotificationContent()
-        content.title = "Late wake up call"
-        content.body = "The early bird catches the worm, but the second mouse gets the cheese."
+        content.title = "Time to log your activity"
+        content.body = "Use Dayand to log what you're doing now and your reaction to it."
         content.categoryIdentifier = "alarm"
         content.userInfo = ["customData": "fizzbuzz"]
         content.sound = UNNotificationSound.default
         
+        // Scheduling random times between 6am and 7pm
+        
+        for index in 6...19 {
+//            let randomHour = Int.random(in: 6..<19)
+            let randomMinute = Int.random(in: 1..<50)
+            
+            var dateComponents = DateComponents()
+            dateComponents.hour = index
+            dateComponents.minute = randomMinute
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+            center.add(request)
+            print("Scheduled notification for \(index):\(randomMinute)")
+        }
         
         // Repeating at a specific time
 //        var dateComponents = DateComponents()
@@ -158,13 +177,16 @@ struct SettingsView: View {
 //        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
 
         // Show five seconds after created
-        var dateComponents = DateComponents()
-        dateComponents.hour = 10
-        dateComponents.minute = 30
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
-
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        center.add(request)
+        
+        
+        
+//        var dateComponents = DateComponents()
+//        dateComponents.hour = 10
+//        dateComponents.minute = 30
+//        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: true)
+//
+//        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+//        center.add(request)
     }
 }
 

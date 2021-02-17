@@ -45,6 +45,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         
         print("Clicked on notification!")
+        
+        
+        statusBar?.togglePopover(sender: StatusBarController.self)
+        
+//        do {
+//            try StatusBarController.togglePopover(statusBar!)
+//        } catch {
+//            // failed to write file – bad permissions, bad filename, missing permissions, or more likely it can't be converted to the encoding
+//        }
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {

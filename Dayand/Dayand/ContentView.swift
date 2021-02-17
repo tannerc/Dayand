@@ -78,7 +78,7 @@ struct ContentView: View {
                         // Button for accessing the Github repo
                         
                         Button(action: {
-                            openURL(URL(string: "https://github.com/tannerc/spf")!)
+                            openURL(URL(string: "https://github.com/tannerc/Dayand")!)
                         }) {
                             Text("About Dayand \(GetBuildVersion())")
                         }
@@ -133,7 +133,7 @@ struct ContentView: View {
                                 .contentShape(Rectangle())
                                 .padding()
                                 .frame(minWidth: 0, maxWidth: .infinity)
-                                .background(Color(.highlightColor))
+                                .background(Color("backgroundColor"))
                         }
                         .buttonStyle(PlainButtonStyle())
                         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 20)
@@ -144,18 +144,18 @@ struct ContentView: View {
             }
             .padding(0)
             .frame(width: 400.0, height: 170.0, alignment: .top)
-            .background(Color(.highlightColor))
+            .background(Color("backgroundColor"))
             
             if(entrySubmitted){
                 VStack() {
                     Text("Saved!")
                         .font(.title)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(Color(.highlightColor))
+                        .foregroundColor(Color("backgroundColor"))
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
-                .background(Color(.textColor).opacity(0.5))
-                .animation(.easeInOut(duration: 1.3))
+                .background(Color(.textColor).opacity(0.4))
+                .animation(.easeInOut(duration: 1.2))
                 .scaleEffect()
             }
         }
@@ -278,9 +278,9 @@ struct ContentView: View {
         window.center()
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
-        window.title = "Activity Log"
+//        window.title = "Activity Log"
         window.setFrameAutosaveName("Activity Window")
-        window.backgroundColor = NSColor(Color(.highlightColor))
+        window.backgroundColor = NSColor(Color("backgroundColor"))
         window.contentView = NSHostingView(rootView: contentView)
         window.makeKeyAndOrderFront(window.self)
         window.minSize = NSSize(width: 700, height: 625)

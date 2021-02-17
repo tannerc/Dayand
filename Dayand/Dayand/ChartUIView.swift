@@ -9,16 +9,11 @@ import SwiftUI
 
 struct ChartUIView: View {
     var chartdata: [String: Int32]
-    @State private var hovered = false
     @Binding var scrollTarget: Int?
     
     var body: some View {
-        
-        let theRoundness = 10
-        
         HStack {
             ZStack {
-                
                 VStack {
                     ForEach(0..<5) { i in
                         Divider().background((Color(.lightGray)).opacity(0.02))
@@ -28,78 +23,89 @@ struct ChartUIView: View {
                 
                 HStack {
                     ForEach(chartdata.keys.sorted(), id: \.self) { key in
-                        VStack {
-                            Spacer()
-                            
-                            Rectangle()
-                                .fill(VariableHeightColor(forHeight: self.chartdata[key] ?? 3))
-                                .frame(minWidth: 1,
-                                       maxWidth: .infinity,
-                                       minHeight: 1,
-                                       maxHeight: CGFloat(self.chartdata[key] ?? 4) * 45.0 + 1)
-                                .padding(EdgeInsets(top: 0, leading: 0, bottom: CGFloat(theRoundness), trailing: 0))
-                                .clipShape(RoundedRectangle(cornerRadius: CGFloat(theRoundness), style: .continuous))
-                            
-                            if (chartdata.count < 20) {
-                                Text("\(FormatDate(whichdate: key))")
-                                    .font(.footnote)
+                        ChartColumn(columnHeight: self.chartdata[key] ?? 0, columnKey: key)
+                            .onTapGesture {
+                                scrollTarget = (chartdata.count-1) - (Array(chartdata.keys.sorted(by: <)).firstIndex(of: key) ?? 0)
+                                print("Would jump to position \(String(describing: scrollTarget))")
                             }
-                        }
-                        .onTapGesture {
-                            scrollTarget = (chartdata.count-1) - (Array(chartdata.keys.sorted(by: <)).firstIndex(of: key) ?? 0)
-                            print("Would jump to position \(String(describing: scrollTarget))")
-                        }
                     }
                 }
             }
             .padding()
-            .background(Color(.textColor).opacity(0.04))
+            .padding(.bottom, -10)
+            .background(Color(.textColor).opacity(0.03))
             .cornerRadius(9)
         }
-        .padding(.horizontal, 10)
+        .padding(.horizontal, 20)
     }
     
-    func FormatDate(whichdate: String) -> String {
-        let dateString = String(whichdate)
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyyMMdd"
-        dateFormatter.locale = Locale.init(identifier: "en_US")
+    struct ChartColumn: View {
+        @State private var hovered = false
+        var columnHeight = Int32()
+        var columnKey = String()
         
-        let dateObj = dateFormatter.date(from: dateString)
-        
-        dateFormatter.dateStyle = .short
-        dateFormatter.timeStyle = .none
-        let returnstring = dateFormatter.string(from: dateObj!)
-        return returnstring
-    }
-    
-    func VariableHeightColor(forHeight: Int32) -> Color {
-        var returnColor: Color
-        returnColor = Color.green
-        
-        switch forHeight {
-            case 0:
-                returnColor = Color(.systemGray)
-
-            case 1:
-                returnColor = Color("dayandRed")
-
-            case 2:
-                returnColor = Color("dayandYellow")
+        var body: some View {
+            VStack {
+                Spacer()
                 
-            case 3:
-                returnColor = Color("dayandYellow")
+                Rectangle()
+                    .fill(VariableHeightColor(forHeight: Int32(columnHeight)))
+                    .frame(minWidth: 1,
+                           maxWidth: .infinity,
+                           minHeight: 1,
+                           maxHeight: CGFloat(columnHeight) * 105.0 + 1)
+                    .padding(EdgeInsets(top: 0, leading: 0, bottom: CGFloat(3), trailing: 0))
+                    .clipShape(RoundedRectangle(cornerRadius: CGFloat(3), style: .continuous))
                 
-            case 4:
-                returnColor = Color("dayandGreen")
-                
-            case 5:
-                returnColor = Color("dayandGreen")
-
-            default:
-                returnColor = Color(.systemGray)
+//                    Text("\(FormatDate(whichdate: columnKey))")
+//                        .font(.footnote)
+//                        .truncationMode(.tail)
+            }
+            .background(Color(.systemGray).opacity(hovered ? 0.2 : 0))
+            .onHover {_ in self.hovered.toggle() }
         }
         
-        return returnColor
+        func VariableHeightColor(forHeight: Int32) -> Color {
+            var returnColor: Color
+            returnColor = Color.green
+            
+            switch forHeight {
+                case 0:
+                    returnColor = Color(.systemGray)
+
+                case 1:
+                    returnColor = Color("dayandRed")
+
+                case 2:
+                    returnColor = Color("dayandYellow")
+                    
+                case 3:
+                    returnColor = Color("dayandYellow")
+                    
+                case 4:
+                    returnColor = Color("dayandGreen")
+                    
+                case 5:
+                    returnColor = Color("dayandGreen")
+
+                default:
+                    returnColor = Color(.systemGray)
+            }
+            
+            return returnColor
+        }
+        
+        func FormatDate(whichdate: String) -> String {
+            let dateString = String(whichdate)
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyyMMdd"
+            dateFormatter.locale = Locale.init(identifier: "en_US")
+            
+            let dateObj = dateFormatter.date(from: dateString)
+            dateFormatter.dateStyle = .short
+            dateFormatter.timeStyle = .none
+            let returnstring = dateFormatter.string(from: dateObj!)
+            return returnstring
+        }
     }
 }

@@ -26,7 +26,7 @@ struct CustomButtonView: View {
                         .multilineTextAlignment(.center)
                         .padding(.vertical, 11.0)
                         .padding(.horizontal, 24.0)
-                        .foregroundColor(Color(.highlightColor))
+                        .foregroundColor(Color("backgroundColor"))
                         .background(Color(.systemBlue))
                         .cornerRadius(buttonRadius)
                         .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
@@ -43,7 +43,7 @@ struct CustomButtonView: View {
                         .padding(.vertical, 11.0)
                         .padding(.horizontal, 24.0)
                         .foregroundColor(Color(.textColor))
-                        .background(Color(.highlightColor))
+                        .background(Color("backgroundColor"))
                         .overlay(
                             RoundedRectangle(cornerRadius: buttonRadius)
                                 .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)

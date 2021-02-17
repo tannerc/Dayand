@@ -28,27 +28,30 @@ struct ActivityView: View {
     // Chart range is a sticky setting saved to UserDefaults
     
     @State private var daysToChart = UserDefaults.standard.integer(forKey: "DayandChartRange")
+    
+    // Scroll for activity log set to zero to start
+    
     @State private var scrollTarget: Int? = 0
+    
+    // Init for daterange filtering between toDate and fromDate
     
     init() {
         if (UserDefaults.standard.integer(forKey: "DayandChartRange") == 0) {
-            UserDefaults.standard.set(7, forKey: "DayandChartRange")
+            UserDefaults.standard.set(14, forKey: "DayandChartRange")
         }
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
         let fromDate = dateFormatter.string(from: Date())
         let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (90 * -1), to: Date()) ?? Date())
-        
-        print("Would look for dates between \(toDate) and \(fromDate)")
-        
+                
         var predicate: NSPredicate?
         predicate = NSPredicate(format: "(date >= %@) AND (date <= %@)", toDate, fromDate)
 
         self._lastndays = FetchRequest(
-        entity: Dataobject.entity(),
-        sortDescriptors: [NSSortDescriptor(keyPath: \Dataobject.logdate, ascending: false)],
-        predicate: predicate)
+            entity: Dataobject.entity(),
+            sortDescriptors: [NSSortDescriptor(keyPath: \Dataobject.logdate, ascending: false)],
+            predicate: predicate)
     }
     
     var lastndaysArray = [String: Int]()
@@ -66,6 +69,11 @@ struct ActivityView: View {
         VStack(alignment: .leading) {
             
             HStack() {
+                Text("Activity Log")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .padding(.leading, 20)
+                
                 Spacer()
                 
                 // SwiftUI is a bit weird with MenuButtons, to create an appropriate label for our button we put it into a ZStack with a Text label.
@@ -83,11 +91,16 @@ struct ActivityView: View {
                         Button(action: {ChangeChartRange(to: 31)}, label: {
                             Text("31 days")
                         })
+                        
+                        Button(action: {ChangeChartRange(to: 48)}, label: {
+                            Text("48 days")
+                        })
                     }
+                    .contentShape(Rectangle())
                     .menuButtonStyle(BorderlessButtonMenuButtonStyle())
                     .frame(width: 132, height: 38, alignment: .trailing)
                     .background(Image("DownTriangleImage").resizable().frame(width: 24, height: 24).foregroundColor(Color(.textColor)).scaleEffect(0.9).padding(8), alignment: .trailing)
-                    .background(Color(.highlightColor))
+                    .background(Color("backgroundColor"))
                     .overlay(
                         RoundedRectangle(cornerRadius: 9)
                             .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
@@ -101,15 +114,15 @@ struct ActivityView: View {
                         .multilineTextAlignment(.center)
                         .padding(.leading, 11.0)
                         .allowsHitTesting(false)
-//                        .padding(.horizontal, 24.0)
                 }
                 
                 // Export to PDF button
                 
-                CustomButtonView(title: "Export CSV", action: { NSApplication.shared.keyWindow?.close() }, disabledState: false, buttonClass: "Default")
-                    .padding(.trailing, 10)
+                CustomButtonView(title: "Export CSV", action: { ExportToPDF() }, disabledState: false, buttonClass: "Default")
+                    .padding(.trailing, 20)
             }
             .padding(.bottom, 4)
+            .padding(.top, -10)
                 
             // Chart view will go here
             
@@ -122,29 +135,30 @@ struct ActivityView: View {
                     ScrollViewReader { proxy in
                         VStack(alignment: .leading) {
                             ForEach(entries, id: \.self) { (loggedentry: Dataobject) in
-                                HStack(alignment: .top) {
-                                    Text(ConvertLogDate(thedate: loggedentry.logdate))
-                                        .font(.headline)
+                                
+                                
+                                VStack(alignment: .leading) {
+//                                    Text(ConvertLogDate(thedate: loggedentry.logdate))
+//                                        .font(.headline)
+//                                        .fontWeight(.bold)
                                     Text(loggedentry.message ?? "No message")
                                     Text(String(loggedentry.response))
-                                    Text(String(entries.firstIndex(of: loggedentry) ?? 0))
                                 }
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .id(entries.firstIndex(of: loggedentry) ?? 0)
                                 .padding()
                             }
                         }
+                        .padding(20)
                         .onChange(of: scrollTarget) { target in
+                            
+                            // Detects if scrollTarget variable has been changed from the ChartUIView
+                            // If scrollTarget has been changed, scrolls to the appropriate location within the ScrollViewReader
+                            
                             if let target = target {
-                                
-                                NSLog("Total scrollable area: \(entries.count - 1)")
-                                
                                 if (scrollTarget ?? 0 >= entries.count) {
                                     scrollTarget = entries.count - 1
                                 }
-                                
-//                                scrollTarget = nil
-                                print("SCROLL TARGET IS: \(scrollTarget)")
 
                                 withAnimation {
                                     proxy.scrollTo(target, anchor: .top)
@@ -156,7 +170,7 @@ struct ActivityView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.bottom, 12)
-            .listRowBackground(Color(.highlightColor))
+            .listRowBackground(Color("backgroundColor"))
             
             Spacer()
         }
@@ -253,10 +267,37 @@ struct ActivityView: View {
         
         return ChartUIView(chartdata: lastndaysArray, scrollTarget: self.$scrollTarget)
     }
+    
+    func ExportToPDF() {
+        let panel = NSSavePanel()
+        panel.nameFieldLabel = "Save activity PDF as:"
+        panel.nameFieldStringValue = "Dayand activity log.csv"
+        panel.canCreateDirectories = true
+        panel.begin { response in
+            if response == NSApplication.ModalResponse.OK, let fileUrl = panel.url {
+                var str = "Date,Time,Message,Response\n"
+                
+                for loggedentry in entries {
+                    str.append("\(loggedentry.date),\(loggedentry.time),\(loggedentry.message?.escapeString() ?? ""),\(loggedentry.response)\n")
+                }
+
+                do {
+                    try str.write(to: fileUrl, atomically: true, encoding: String.Encoding.utf8)
+                } catch {
+                    // failed to write file – bad permissions, bad filename, missing permissions, or more likely it can't be converted to the encoding
+                }
+            }
+        }
+    }
 }
 
-struct ActivityView_Previews: PreviewProvider {
-    static var previews: some View {
-        ActivityView().environment(\.colorScheme, .light)
+extension String {
+    func escapeString() -> String {
+        var newString = self.replacingOccurrences(of: "\"", with: "\"\"")
+        if newString.contains(",") || newString.contains("\n") {
+            newString = String(format: "\"%@\"", newString)
+        }
+
+        return newString
     }
 }
