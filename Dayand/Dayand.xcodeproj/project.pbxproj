@@ -10,6 +10,7 @@
 		4304FF4025BFAB1400C46EDB /* ActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4304FF3F25BFAB1400C46EDB /* ActivityView.swift */; };
 		4304FF5925C39D4700C46EDB /* ChartUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4304FF5825C39D4700C46EDB /* ChartUIView.swift */; };
 		43637C3825BDEE8E00FC674C /* Dayand.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 43637C3625BDEE8E00FC674C /* Dayand.xcdatamodeld */; };
+		436BC6AE25D8916D00594A7C /* CustomButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436BC6AD25D8916D00594A7C /* CustomButtonView.swift */; };
 		4390A27125BCAE6400654115 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4390A27025BCAE6400654115 /* AppDelegate.swift */; };
 		4390A27325BCAE6400654115 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4390A27225BCAE6400654115 /* ContentView.swift */; };
 		4390A27525BCAE6400654115 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4390A27425BCAE6400654115 /* Assets.xcassets */; };
@@ -26,6 +27,7 @@
 		4304FF3F25BFAB1400C46EDB /* ActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityView.swift; sourceTree = "<group>"; };
 		4304FF5825C39D4700C46EDB /* ChartUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartUIView.swift; sourceTree = "<group>"; };
 		43637C3725BDEE8E00FC674C /* Dayand.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Dayand.xcdatamodel; sourceTree = "<group>"; };
+		436BC6AD25D8916D00594A7C /* CustomButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomButtonView.swift; sourceTree = "<group>"; };
 		4390A26D25BCAE6400654115 /* Dayand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dayand.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4390A27025BCAE6400654115 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4390A27225BCAE6400654115 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -78,6 +80,7 @@
 				4390A29725BCB53100654115 /* LogViewController.swift */,
 				4304FF3F25BFAB1400C46EDB /* ActivityView.swift */,
 				4304FF5825C39D4700C46EDB /* ChartUIView.swift */,
+				436BC6AD25D8916D00594A7C /* CustomButtonView.swift */,
 				4390A27425BCAE6400654115 /* Assets.xcassets */,
 				4390A28425BCAED200654115 /* StatusBarController.swift */,
 				4390A28925BCB0E100654115 /* EventsController.swift */,
@@ -171,6 +174,7 @@
 				439C257425BCE5C0002388AF /* SettingsView.swift in Sources */,
 				4390A27325BCAE6400654115 /* ContentView.swift in Sources */,
 				4390A28525BCAED200654115 /* StatusBarController.swift in Sources */,
+				436BC6AE25D8916D00594A7C /* CustomButtonView.swift in Sources */,
 				4304FF5925C39D4700C46EDB /* ChartUIView.swift in Sources */,
 				4390A28A25BCB0E100654115 /* EventsController.swift in Sources */,
 				43637C3825BDEE8E00FC674C /* Dayand.xcdatamodeld in Sources */,

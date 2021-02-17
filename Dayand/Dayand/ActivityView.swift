@@ -25,13 +25,20 @@ struct ActivityView: View {
     
     @FetchRequest var lastndays: FetchedResults<Dataobject>
     
-    @State private var daysToChart = 7
+    // Chart range is a sticky setting saved to UserDefaults
+    
+    @State private var daysToChart = UserDefaults.standard.integer(forKey: "DayandChartRange")
+    @State private var scrollTarget: Int? = 0
     
     init() {
+        if (UserDefaults.standard.integer(forKey: "DayandChartRange") == 0) {
+            UserDefaults.standard.set(7, forKey: "DayandChartRange")
+        }
+        
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
         let fromDate = dateFormatter.string(from: Date())
-        let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (45 * -1), to: Date()) ?? Date())
+        let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (90 * -1), to: Date()) ?? Date())
         
         print("Would look for dates between \(toDate) and \(fromDate)")
         
@@ -61,23 +68,49 @@ struct ActivityView: View {
             HStack(alignment: .center) {
                 Spacer()
                 
-                Menu {
-                    Button(action: {daysToChart = 7}, label: {
-                        Text("7 days")
-                    })
-                    Button(action: {daysToChart = 14}, label: {
-                        Text("14 days")
-                    })
-                    Button(action: {daysToChart = 28}, label: {
-                        Text("28 days")
-                    })
-                } label: {
-                    Text("\(daysToChart) days")
+                // SwiftUI is a bit weird with MenuButtons, to create an appropriate label for our button we put it into a ZStack with a Text label.
+                
+                ZStack(alignment: .leading) {
+                    MenuButton("") {
+                        Button(action: {ChangeChartRange(to: 7)}, label: {
+                            Text("7 days")
+                        })
+
+                        Button(action: {ChangeChartRange(to: 14)}, label: {
+                            Text("14 days")
+                        })
+
+                        Button(action: {ChangeChartRange(to: 31)}, label: {
+                            Text("31 days")
+                        })
+                    }
+                    .menuButtonStyle(BorderlessButtonMenuButtonStyle())
+                    .frame(width: 132, height: 38, alignment: .trailing)
+                    .background(Image("DownTriangleImage").resizable().frame(width: 24, height: 24).foregroundColor(Color(.textColor)).scaleEffect(0.9).padding(8), alignment: .trailing)
+                    .background(Color(.highlightColor))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 9)
+                            .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
+                    )
+                    .cornerRadius(9)
+                    .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
+
+                    Text("Chart \(daysToChart) Days")
+                        .font(.headline)
+                        .fontWeight(.medium)
+                        .multilineTextAlignment(.center)
+                        .padding(.leading, 11.0)
+                        .allowsHitTesting(false)
+//                        .padding(.horizontal, 24.0)
                 }
-                .frame(width: 100)
-                .padding()
+                
+                // Export to PDF button
+                
+                CustomButtonView(title: "Export CSV", action: { NSApplication.shared.keyWindow?.close() }, disabledState: false, buttonClass: "Default")
+                    .padding(.trailing, 10)
             }
-            
+            .padding(.bottom, 4)
+                
             // Chart view will go here
             
             ChartNEntries()
@@ -86,24 +119,46 @@ struct ActivityView: View {
             
             HStack(alignment: .top) {
                 VStack(alignment: .leading) {
-                    List {
-                        ForEach(entries, id: \.self) { (loggedentry: Dataobject) in
-                            HStack {
-                                Text(ConvertLogDate(thedate: loggedentry.logdate))
-                                    .font(.headline)
-                                Text(loggedentry.message ?? "No message")
-                                Text(String(loggedentry.response))
-                            }.padding()
-                        }.listRowBackground(Color.clear)
-                    }.listRowBackground(Color.clear)
+                    ScrollView {
+                        ScrollViewReader { proxy in
+                            VStack {
+                                Button("Jump to #8") {
+                                    proxy.scrollTo(8, anchor: .top)
+                                }
+                                
+                                ForEach(entries, id: \.self) { (loggedentry: Dataobject) in
+                                    HStack {
+                                        Text(ConvertLogDate(thedate: loggedentry.logdate))
+                                            .font(.headline)
+                                        Text(loggedentry.message ?? "No message")
+                                        Text(String(loggedentry.response))
+                                        Text(String(entries.firstIndex(of: loggedentry) ?? 0))
+                                    }
+                                    .id(entries.firstIndex(of: loggedentry) ?? 0)
+                                    .padding()
+                                }
+                            }
+                            .onChange(of: scrollTarget) { target in
+                                if let target = target {
+                                    scrollTarget = nil
 
+                                    withAnimation {
+                                        proxy.scrollTo(target, anchor: .top)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
                     Spacer()
                 }
             }
             .padding(.bottom, 12)
+            .listRowBackground(Color(.highlightColor))
             
             Spacer()
-        }.padding(.top, 20)
+        }
+        .padding(.top, 20)
     }
     
     func ConvertLogDate(thedate: Int64) -> String {
@@ -122,7 +177,6 @@ struct ActivityView: View {
     }
     
     func GetAllEntries() -> String {
-        
         if entries.isEmpty {
             return "0 activities"
         } else {
@@ -138,6 +192,11 @@ struct ActivityView: View {
         }
     }
     
+    func ChangeChartRange(to: Int) {
+        daysToChart = to
+        UserDefaults.standard.set(to, forKey: "DayandChartRange")
+    }
+    
     func ChartNEntries() -> ChartUIView {
         
         // Update lastndaysArray to contain last "daysToChart" days
@@ -147,116 +206,50 @@ struct ActivityView: View {
         
         var lastndaysArray = [String: Int32]()
         
-        for index in 0...(daysToChart - 1) {
+        for index in 0...(daysToChart-1) {
             let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (index * -1), to: Date()) ?? Date())
             lastndaysArray[toDate] = 0
         }
         
-        print("Starting lastndaysArray: \(lastndaysArray)")
+//        print("Starting lastndaysArray for \(daysToChart) days (lastndays is: \(lastndays.count)): \(lastndaysArray)")
         
         let sortedArrayKeys = Array(lastndaysArray.keys.sorted(by: <))
         
         for index in 0...(daysToChart-1) {
-            print("Checking \(lastndays[index].date)...")
-            
-            if(sortedArrayKeys.contains(String(lastndays[index].date))){
-                
-                // Logged day is within the time range to chart
-                // Get the response and set it as an average...
-                
-                let existingAvg = lastndaysArray[String(lastndays[index].date)] ?? 0
-                let indexAvg = lastndays[index].response
-                var newAvg = Int32(0)
-                
-                if existingAvg == 0 {
+            if (lastndays.count > index) {
+                if(sortedArrayKeys.contains(String(lastndays[index].date))){
                     
-                    // No existing average for the date, set the new average to this index to start calculating (if there are multiple inputs for a single day)
+                    // Logged day is within the time range to chart
+                    // Get the response and set it as an average...
                     
-                    newAvg = Int32(Int(indexAvg))
+                    let existingAvg = lastndaysArray[String(lastndays[index].date)] ?? 0
+                    let indexAvg = lastndays[index].response
+                    var newAvg = Int32(0)
+                    
+                    if existingAvg == 0 {
+                        
+                        // No existing average for the date, set the new average to this index to start calculating (if there are multiple inputs for a single day)
+                        
+                        newAvg = Int32(Int(indexAvg))
+                    } else {
+                        
+                        // Existing average greater than zero, do some math
+                        
+                        let themath = (existingAvg + indexAvg)
+                        newAvg = (themath / 2)
+                    }
+                    
+                    lastndaysArray[String(lastndays[index].date)] = Int32(newAvg)
                 } else {
                     
-                    // Existing average greater than zero, do some math
-                    
-                    print("Avg exists! Math: \(existingAvg) + \(indexAvg) / 2")
-                    
-                    let themath = (existingAvg + indexAvg)
-                    print("The math: \(Int32(themath))")
-                    newAvg = (themath / 2)
+                    // No day logged within time range, report zero
+                                        
+                    lastndaysArray[String(lastndays[index].date)] = 0
                 }
-                
-                print("New avg for this date: \(Int32(newAvg))")
-                lastndaysArray[String(lastndays[index].date)] = Int32(newAvg)
-            } else {
-                
-                // No day logged within time range, report zero
-                
-                print("Day not in range, setting average to zero")
-                
-                lastndaysArray[String(lastndays[index].date)] = 0
             }
         }
         
-        print(lastndaysArray.sorted(by: <))
-        
-        return ChartUIView(chartdata: lastndaysArray)
-    }
-    
-    func DeleteAllEntries() {
-//        let center = UNUserNotificationCenter.current()
-//        center.requestAuthorization(options: [.alert, .sound, .badge, .provisional]) { granted, error in
-//
-//            if let error = error {
-//                // Handle the error here.
-//            }
-//
-//            // Provisional authorization granted.
-//        }
-        
-        for index in 0...entries.count-1 {
-            moc.delete(entries[index])
-        }
-        try? self.moc.save()
-        print("Done!")
-    }
-    
-    func DisplayNotification() {
-        let center = UNUserNotificationCenter.current()
-
-        center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
-            if granted {
-                print("Yay!")
-                scheduleNotification()
-            } else {
-                print("D'oh")
-            }
-        }
-    }
-    
-    func scheduleNotification() {
-        let center = UNUserNotificationCenter.current()
-
-        let content = UNMutableNotificationContent()
-        content.title = "Late wake up call"
-        content.body = "The early bird catches the worm, but the second mouse gets the cheese."
-        content.categoryIdentifier = "alarm"
-        content.userInfo = ["customData": "fizzbuzz"]
-        content.sound = UNNotificationSound.default
-        
-        
-        // Repeating at a specific time
-//        var dateComponents = DateComponents()
-//        dateComponents.hour = 10
-//        dateComponents.minute = 30
-//        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-
-        // Show five seconds after created
-        var dateComponents = DateComponents()
-        dateComponents.hour = 10
-        dateComponents.minute = 30
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
-
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        center.add(request)
+        return ChartUIView(chartdata: lastndaysArray, scrollTarget: self.$scrollTarget)
     }
 }
 

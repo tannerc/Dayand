@@ -78,14 +78,14 @@ struct SettingsView: View {
             HStack() {
                 Spacer()
                 
-                DayandButton(title: "Cancel", action: { NSApplication.shared.keyWindow?.close() }, backgroundColor: Color(.systemGray).opacity(0.4), disabledState: false)
+                CustomButtonView(title: "Cancel", action: { NSApplication.shared.keyWindow?.close() }, disabledState: false, buttonClass: "Default")
                 
-                DayandButton(title: "Save changes", action: { NSApplication.shared.keyWindow?.close() }, backgroundColor: Color(.systemBlue), disabledState: !changesMade)
+                CustomButtonView(title: "Save", action: { NSApplication.shared.keyWindow?.close() }, disabledState: !changesMade, buttonClass: "Primary")
             }
             .buttonStyle(PlainButtonStyle())
         }
         .padding(20)
-//        .background(Color(.highlightColor))
+        .background(Color(.highlightColor))
     }
     
     func GetAllEntries() -> String {
@@ -121,6 +121,10 @@ struct SettingsView: View {
         }
         try? self.moc.save()
         print("Done!")
+        
+        if let appDomain = Bundle.main.bundleIdentifier {
+            UserDefaults.standard.removePersistentDomain(forName: appDomain)
+        }
     }
     
     func DisplayNotification() {
@@ -166,28 +170,6 @@ struct SettingsView: View {
 
 func ChangeColorCopyFormat(toValue: String) {
     UserDefaults.standard.set(toValue, forKey: "superbcolorcopyformat")
-}
-
-struct DayandButton: View {
-    let title: String
-    let action: () -> Void
-    let backgroundColor: Color
-    let disabledState: Bool
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .padding(.vertical, 12.0)
-                .padding(.horizontal, 20.0)
-                .foregroundColor(.white)
-                .background(backgroundColor)
-                .cornerRadius(8)
-                .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
-        }
-        .disabled(disabledState)
-    }
 }
 
 struct SettingsView_Previews: PreviewProvider {

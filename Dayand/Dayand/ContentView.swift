@@ -90,7 +90,7 @@ struct ContentView: View {
                         }) {
                             Text("Quit")
                         }
-                    }.background(Image("SettingsImage").foregroundColor(Color(.textColor)).scaleEffect(0.9))
+                    }.background(Image("SettingsImage").resizable().frame(width: 24, height: 24, alignment: .center).foregroundColor(Color(.textColor)))
                         .frame(width: 24, height: 24, alignment: .trailing)
                         .padding(4)
                         .menuButtonStyle(BorderlessButtonMenuButtonStyle())
@@ -133,7 +133,7 @@ struct ContentView: View {
                                 .contentShape(Rectangle())
                                 .padding()
                                 .frame(minWidth: 0, maxWidth: .infinity)
-                                .background(Color(.windowBackgroundColor))
+                                .background(Color(.highlightColor))
                         }
                         .buttonStyle(PlainButtonStyle())
                         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 20)
@@ -144,7 +144,7 @@ struct ContentView: View {
             }
             .padding(0)
             .frame(width: 400.0, height: 170.0, alignment: .top)
-            .background(Color(.windowBackgroundColor))
+            .background(Color(.highlightColor))
             
             if(entrySubmitted){
                 VStack() {
@@ -267,20 +267,23 @@ struct ContentView: View {
     func DisplayActivityWindow() {
         var window: NSWindow!
         let contentView = ActivityView().environment(\.managedObjectContext, moc)
+            .frame(minWidth: 700, minHeight: 625)
 
         // Create the window and set the content view.
         
         window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 700, height: 625),
-            styleMask: [.titled, .closable],
+            styleMask: [.titled, .closable, .resizable],
             backing: .buffered, defer: false)
         window.center()
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
         window.title = "Activity Log"
         window.setFrameAutosaveName("Activity Window")
+        window.backgroundColor = NSColor(Color(.highlightColor))
         window.contentView = NSHostingView(rootView: contentView)
         window.makeKeyAndOrderFront(window.self)
+        window.minSize = NSSize(width: 700, height: 625)
         NSApp.activate(ignoringOtherApps: true)
         window.isReleasedWhenClosed = false
     }
