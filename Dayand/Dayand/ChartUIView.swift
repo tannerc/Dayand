@@ -46,7 +46,8 @@ struct ChartUIView: View {
                             }
                         }
                         .onTapGesture {
-                            scrollTarget = Array(chartdata.keys).firstIndex(of: key)
+                            scrollTarget = (chartdata.count-1) - (Array(chartdata.keys.sorted(by: <)).firstIndex(of: key) ?? 0)
+                            print("Would jump to position \(String(describing: scrollTarget))")
                         }
                     }
                 }
@@ -102,15 +103,3 @@ struct ChartUIView: View {
         return returnColor
     }
 }
-
-
-//struct ChartUIView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ChartUIView(chartdata: ["20210102": 3,
-//                    "20210103": 0,
-//                    "20210104": 5,
-//                    "20210105": 0,
-//                    "20210106": 2,
-//                    "20210107": 2], scrollTarget: 0)
-//    }
-//}

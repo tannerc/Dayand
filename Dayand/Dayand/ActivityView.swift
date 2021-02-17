@@ -65,7 +65,7 @@ struct ActivityView: View {
     var body: some View {
         VStack(alignment: .leading) {
             
-            HStack(alignment: .center) {
+            HStack() {
                 Spacer()
                 
                 // SwiftUI is a bit weird with MenuButtons, to create an appropriate label for our button we put it into a ZStack with a Text label.
@@ -118,41 +118,43 @@ struct ActivityView: View {
             // List view of all past data
             
             HStack(alignment: .top) {
-                VStack(alignment: .leading) {
-                    ScrollView {
-                        ScrollViewReader { proxy in
-                            VStack {
-                                Button("Jump to #8") {
-                                    proxy.scrollTo(8, anchor: .top)
+                ScrollView() {
+                    ScrollViewReader { proxy in
+                        VStack(alignment: .leading) {
+                            ForEach(entries, id: \.self) { (loggedentry: Dataobject) in
+                                HStack(alignment: .top) {
+                                    Text(ConvertLogDate(thedate: loggedentry.logdate))
+                                        .font(.headline)
+                                    Text(loggedentry.message ?? "No message")
+                                    Text(String(loggedentry.response))
+                                    Text(String(entries.firstIndex(of: loggedentry) ?? 0))
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .id(entries.firstIndex(of: loggedentry) ?? 0)
+                                .padding()
+                            }
+                        }
+                        .onChange(of: scrollTarget) { target in
+                            if let target = target {
+                                
+                                NSLog("Total scrollable area: \(entries.count - 1)")
+                                
+                                if (scrollTarget ?? 0 >= entries.count) {
+                                    scrollTarget = entries.count - 1
                                 }
                                 
-                                ForEach(entries, id: \.self) { (loggedentry: Dataobject) in
-                                    HStack {
-                                        Text(ConvertLogDate(thedate: loggedentry.logdate))
-                                            .font(.headline)
-                                        Text(loggedentry.message ?? "No message")
-                                        Text(String(loggedentry.response))
-                                        Text(String(entries.firstIndex(of: loggedentry) ?? 0))
-                                    }
-                                    .id(entries.firstIndex(of: loggedentry) ?? 0)
-                                    .padding()
-                                }
-                            }
-                            .onChange(of: scrollTarget) { target in
-                                if let target = target {
-                                    scrollTarget = nil
+//                                scrollTarget = nil
+                                print("SCROLL TARGET IS: \(scrollTarget)")
 
-                                    withAnimation {
-                                        proxy.scrollTo(target, anchor: .top)
-                                    }
+                                withAnimation {
+                                    proxy.scrollTo(target, anchor: .top)
                                 }
                             }
                         }
                     }
-                    
-                    Spacer()
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.bottom, 12)
             .listRowBackground(Color(.highlightColor))
             
