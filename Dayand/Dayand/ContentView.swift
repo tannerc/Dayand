@@ -256,6 +256,7 @@ struct ContentView: View {
         window.titleVisibility = .hidden
         window.title = "Dayand Settings"
         window.setFrameAutosaveName("Settings Window")
+        window.backgroundColor = NSColor(Color("backgroundColor"))
         window.contentView = NSHostingView(rootView: contentView)
         window.makeKeyAndOrderFront(window.self)
         NSApp.activate(ignoringOtherApps: true)

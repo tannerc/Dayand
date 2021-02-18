@@ -34,7 +34,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         let center = UNUserNotificationCenter.current()
         center.delegate = self
 
-        let show = UNNotificationAction(identifier: "show", title: "Tell me more…", options: .foreground)
+        let show = UNNotificationAction(identifier: "show", title: "Open Dayand", options: .foreground)
         let category = UNNotificationCategory(identifier: "alarm", actions: [show], intentIdentifiers: [])
 
         center.setNotificationCategories([category])
@@ -46,14 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         
         print("Clicked on notification!")
         
-        
         statusBar?.togglePopover(sender: StatusBarController.self)
-        
-//        do {
-//            try StatusBarController.togglePopover(statusBar!)
-//        } catch {
-//            // failed to write file – bad permissions, bad filename, missing permissions, or more likely it can't be converted to the encoding
-//        }
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {

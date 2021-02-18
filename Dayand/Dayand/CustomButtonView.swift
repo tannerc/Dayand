@@ -33,6 +33,26 @@ struct CustomButtonView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
                 .disabled(disabledState ?? false)
+                
+            case "Destructive":
+                Button(action: action) {
+                    Text(title)
+                        .font(.headline)
+                        .fontWeight(.medium)
+                        .multilineTextAlignment(.center)
+                        .padding(.vertical, 11.0)
+                        .padding(.horizontal, 24.0)
+                        .foregroundColor(Color(.red))
+                        .background(Color("backgroundColor"))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: buttonRadius)
+                                .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
+                        )
+                        .cornerRadius(buttonRadius)
+                        .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .disabled(disabledState ?? false)
             
             default:
                 Button(action: action) {
