@@ -26,11 +26,11 @@ struct ChartUIView: View {
                         ChartColumn(columnHeight: self.chartdata[key] ?? 0, columnKey: key)
                             .onTapGesture {
                                 scrollTarget = (chartdata.count-1) - (Array(chartdata.keys.sorted(by: <)).firstIndex(of: key) ?? 0)
-                                print("Would jump to position \(String(describing: scrollTarget))")
                             }
                     }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: 200)
             .padding()
             .padding(.bottom, -10)
             .background(Color(.textColor).opacity(0.03))
@@ -53,7 +53,7 @@ struct ChartUIView: View {
                     .frame(minWidth: 1,
                            maxWidth: .infinity,
                            minHeight: 1,
-                           maxHeight: CGFloat(columnHeight) * 105.0 + 1)
+                           maxHeight: CGFloat(columnHeight) * 140 + 1)
                     .padding(EdgeInsets(top: 0, leading: 0, bottom: CGFloat(3), trailing: 0))
                     .clipShape(RoundedRectangle(cornerRadius: CGFloat(3), style: .continuous))
                 
@@ -74,19 +74,19 @@ struct ChartUIView: View {
                     returnColor = Color(.systemGray)
 
                 case 1:
-                    returnColor = Color("dayandRed")
+                    returnColor = Color("blue5")
 
                 case 2:
-                    returnColor = Color("dayandYellow")
+                    returnColor = Color("blue4")
                     
                 case 3:
-                    returnColor = Color("dayandYellow")
+                    returnColor = Color("blue3")
                     
                 case 4:
-                    returnColor = Color("dayandGreen")
+                    returnColor = Color("blue2")
                     
                 case 5:
-                    returnColor = Color("dayandGreen")
+                    returnColor = Color(.systemBlue)
 
                 default:
                     returnColor = Color(.systemGray)

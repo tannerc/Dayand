@@ -37,7 +37,7 @@ struct ActivityView: View {
     
     init() {
         if (UserDefaults.standard.integer(forKey: "DayandChartRange") == 0) {
-            UserDefaults.standard.set(14, forKey: "DayandChartRange")
+            UserDefaults.standard.set(7, forKey: "DayandChartRange")
         }
         
         let dateFormatter = DateFormatter()
@@ -55,6 +55,7 @@ struct ActivityView: View {
     }
     
     var lastndaysArray = [String: Int]()
+    @State private var rowHovered = false
     
     // For checking responses
     
@@ -68,10 +69,11 @@ struct ActivityView: View {
     var body: some View {
         VStack(alignment: .leading) {
             
+            // Window header
+            
             HStack() {
                 Text("Activity Log")
                     .font(.largeTitle)
-                    .fontWeight(.bold)
                     .padding(.leading, 20)
                 
                 Spacer()
@@ -95,20 +97,24 @@ struct ActivityView: View {
                         Button(action: {ChangeChartRange(to: 48)}, label: {
                             Text("48 days")
                         })
+                        
+                        Button(action: {ChangeChartRange(to: 90)}, label: {
+                            Text("90 days")
+                        })
                     }
                     .contentShape(Rectangle())
                     .menuButtonStyle(BorderlessButtonMenuButtonStyle())
-                    .frame(width: 132, height: 38, alignment: .trailing)
+                    .frame(width: 122, height: 38, alignment: .trailing)
                     .background(Image("DownTriangleImage").resizable().frame(width: 24, height: 24).foregroundColor(Color(.textColor)).scaleEffect(0.9).padding(8), alignment: .trailing)
                     .background(Color("backgroundColor"))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 9)
+                        RoundedRectangle(cornerRadius: 7)
                             .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
                     )
-                    .cornerRadius(9)
+                    .cornerRadius(7)
                     .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
 
-                    Text("Chart \(daysToChart) Days")
+                    Text("\(daysToChart) Days")
                         .font(.headline)
                         .fontWeight(.medium)
                         .multilineTextAlignment(.center)
@@ -120,36 +126,57 @@ struct ActivityView: View {
                 
                 CustomButtonView(title: "Export CSV", action: { ExportToPDF() }, disabledState: false, buttonClass: "Default")
                     .padding(.trailing, 20)
+                    .disabled(entries.count > 0 ? false : true)
             }
-            .padding(.bottom, 4)
-            .padding(.top, -10)
+            .padding(.bottom, 12)
+            .padding(.top, -12)
                 
-            // Chart view will go here
+            // Chart view
             
             ChartNEntries()
             
             // List view of all past data
+            // Starting with a table header
             
-            HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(alignment: .center, spacing: 0) {
+                    Text("Date")
+                        .font(.headline)
+                        .multilineTextAlignment(.leading)
+                        .frame(width: 100)
+                    
+                    Text("Time")
+                        .font(.headline)
+                        .multilineTextAlignment(.leading)
+                        .frame(width: 60)
+                    
+                    Text("Response")
+                        .font(.headline)
+                        .multilineTextAlignment(.leading)
+                        .frame(width: 80)
+                    
+                    Text("Activity")
+                        .font(.headline)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: 30)
+                .background(Color(.textColor).opacity(0.02))
+                
+                Divider().background((Color(.lightGray)).opacity(0.02))
+                
+                // Now all the data in a table-like format
+                
                 ScrollView() {
                     ScrollViewReader { proxy in
-                        VStack(alignment: .leading) {
+                        VStack(alignment: .leading, spacing: 0) {
                             ForEach(entries, id: \.self) { (loggedentry: Dataobject) in
-                                
-                                
-                                VStack(alignment: .leading) {
-//                                    Text(ConvertLogDate(thedate: loggedentry.logdate))
-//                                        .font(.headline)
-//                                        .fontWeight(.bold)
-                                    Text(loggedentry.message ?? "No message")
-                                    Text(String(loggedentry.response))
-                                }
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .id(entries.firstIndex(of: loggedentry) ?? 0)
-                                .padding()
+                                TableRow(withDate: loggedentry.logdate, withResponse: loggedentry.response, withActivity: loggedentry.activity ?? "No activity", theObject: loggedentry)
+                                Divider().background((Color(.lightGray)).opacity(0.02))
                             }
                         }
-                        .padding(20)
                         .onChange(of: scrollTarget) { target in
                             
                             // Detects if scrollTarget variable has been changed from the ChartUIView
@@ -168,7 +195,13 @@ struct ActivityView: View {
                     }
                 }
             }
+            .overlay(
+                RoundedRectangle(cornerRadius: 7)
+                    .stroke(Color(.systemGray).opacity(0.5), lineWidth: 1)
+            )
+            .cornerRadius(7)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.horizontal, 20)
             .padding(.bottom, 12)
             .listRowBackground(Color("backgroundColor"))
             
@@ -177,20 +210,7 @@ struct ActivityView: View {
         .padding(.top, 20)
     }
     
-    func ConvertLogDate(thedate: Int64) -> String {
-        let dateString = String(thedate)
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyyMMddhhmmss"
-        dateFormatter.locale = Locale.init(identifier: "en_US")
-        
-        let dateObj = dateFormatter.date(from: dateString)
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .none
-//        dateFormatter.dateFormat = "MMM dd-yyyy"
-        let returnstring = dateFormatter.string(from: dateObj!)
-        
-        return returnstring
-    }
+    // Function to get all saved activities
     
     func GetAllEntries() -> String {
         if entries.isEmpty {
@@ -208,10 +228,14 @@ struct ActivityView: View {
         }
     }
     
+    // Simple function for changing the charted range of activities
+    
     func ChangeChartRange(to: Int) {
         daysToChart = to
         UserDefaults.standard.set(to, forKey: "DayandChartRange")
     }
+    
+    // Function for getting the last n days of activity for visualizing
     
     func ChartNEntries() -> ChartUIView {
         
@@ -222,16 +246,18 @@ struct ActivityView: View {
         
         var lastndaysArray = [String: Int32]()
         
-        for index in 0...(daysToChart-1) {
+        if daysToChart < 1 {
+            daysToChart = 7
+        }
+        
+        for index in 0...(daysToChart) {
             let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (index * -1), to: Date()) ?? Date())
             lastndaysArray[toDate] = 0
         }
         
-//        print("Starting lastndaysArray for \(daysToChart) days (lastndays is: \(lastndays.count)): \(lastndaysArray)")
-        
         let sortedArrayKeys = Array(lastndaysArray.keys.sorted(by: <))
         
-        for index in 0...(daysToChart-1) {
+        for index in 0...(daysToChart) {
             if (lastndays.count > index) {
                 if(sortedArrayKeys.contains(String(lastndays[index].date))){
                     
@@ -268,6 +294,8 @@ struct ActivityView: View {
         return ChartUIView(chartdata: lastndaysArray, scrollTarget: self.$scrollTarget)
     }
     
+    // Export to PDF... of course
+    
     func ExportToPDF() {
         let panel = NSSavePanel()
         panel.nameFieldLabel = "Save activity PDF as:"
@@ -275,10 +303,10 @@ struct ActivityView: View {
         panel.canCreateDirectories = true
         panel.begin { response in
             if response == NSApplication.ModalResponse.OK, let fileUrl = panel.url {
-                var str = "Date,Time,Message,Response\n"
+                var str = "Date,Time,Activity,Response\n"
                 
                 for loggedentry in entries {
-                    str.append("\(loggedentry.date),\(loggedentry.time),\(loggedentry.message?.escapeString() ?? ""),\(loggedentry.response)\n")
+                    str.append("\(loggedentry.date),\(loggedentry.time),\(loggedentry.activity?.escapeString() ?? ""),\(loggedentry.response)\n")
                 }
 
                 do {
@@ -291,6 +319,8 @@ struct ActivityView: View {
     }
 }
 
+// Escape extension for ensuring when saving data to CSV commas are escaped from activities the user may have input
+
 extension String {
     func escapeString() -> String {
         var newString = self.replacingOccurrences(of: "\"", with: "\"\"")
@@ -299,5 +329,115 @@ extension String {
         }
 
         return newString
+    }
+}
+
+// Structure for table rows and relevant actions (like deleting a saved activity)
+
+struct TableRow: View {
+    
+    @Environment(\.managedObjectContext) var moc
+    
+    @State var hovered = false
+    var withDate: Int64
+    var withResponse: Int32
+    var withActivity: String
+    var theObject: Dataobject
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            HStack(alignment: .center, spacing: 0) {
+                Text(ConvertLogDate(thedate: withDate))
+                    .multilineTextAlignment(.leading)
+                    .frame(width: 100)
+                
+                Text(ConvertLogTime(thetime: withDate))
+                    .multilineTextAlignment(.leading)
+                    .frame(width: 60)
+                
+                Text(String(withResponse))
+                    .multilineTextAlignment(.leading)
+                    .frame(width: 80)
+                
+                Text(withActivity)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            
+            MenuButton("") {
+                Button(action: {
+                    removeActivity(activity: theObject)
+                }) {
+                    Text("Edit activity")
+                }
+                
+                Button(action: {
+                    removeActivity(activity: theObject)
+                }) {
+                    Text("Delete activity")
+                }
+            }
+            .contentShape(Rectangle())
+            .menuButtonStyle(BorderlessButtonMenuButtonStyle())
+            .frame(width: 32, height: 32, alignment: .center)
+            .background(Image("OverflowIconImage").resizable().frame(width: 26, height: 26).foregroundColor(Color(.textColor).opacity(0.8)).padding(8), alignment: .center)
+            .background(Color("backgroundColor"))
+            .overlay(
+                RoundedRectangle(cornerRadius: 7)
+                    .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
+            )
+            .cornerRadius(7)
+            .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
+            .opacity(self.hovered ? 1.0 : 0)
+            .disabled(self.hovered ? false : true)
+            
+            Spacer()
+        }
+        .padding(8)
+        .background(Color(.textColor).opacity(self.hovered ? 0.01 : 0))
+        .onHover {_ in self.hovered.toggle() }
+    }
+    
+    // Useful function for converting the date of our data
+    
+    func ConvertLogDate(thedate: Int64) -> String {
+        let dateString = String(thedate)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMddHHmmss"
+        dateFormatter.locale = Locale.init(identifier: "en_US")
+        
+        let dateObj = dateFormatter.date(from: dateString)
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .none
+        let returnstring = dateFormatter.string(from: dateObj!)
+        
+        return returnstring
+    }
+    
+    // Lazy duplicate of previous function for converting time of our data
+    
+    func ConvertLogTime(thetime: Int64) -> String {
+        let dateString = String(thetime)
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMddHHmmss"
+        dateFormatter.locale = Locale.init(identifier: "en_US")
+        
+        let dateObj = dateFormatter.date(from: dateString)
+        dateFormatter.dateStyle = .none
+        dateFormatter.timeStyle = .short
+        let returnstring = dateFormatter.string(from: dateObj!)
+        
+        return returnstring
+    }
+    
+    // Function for removing an activity object from the Managed Object Context, which we duplicated at the top of this structure
+    
+    func removeActivity(activity: Dataobject) {
+        moc.delete(activity)
+        do {
+            try moc.save()
+        } catch {
+            // Error occurred
+        }
     }
 }

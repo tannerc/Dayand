@@ -15,6 +15,7 @@ struct SettingsView: View {
     @FetchRequest(entity: Dataobject.entity(), sortDescriptors: []) var entries: FetchedResults<Dataobject>
     
     @State private var changesMade = false
+    @State private var showingAlert = false
     
     @State var remindersEnabled = UserDefaults.standard.bool(forKey: "DayandRemindersEnabled")
     @State var reminderCadence = UserDefaults.standard.string(forKey: "DayandReminderCadence")
@@ -27,179 +28,137 @@ struct SettingsView: View {
             
             Text("Settings")
                 .font(.largeTitle)
-                .fontWeight(.semibold)
                 .foregroundColor(Color(.textColor))
+                .padding(.bottom, 20)
                 
-            VStack(alignment: .leading) {
+            HStack(alignment: .center, spacing: 16) {
+                Toggle("", isOn: $remindersEnabled)
+                    .onReceive([self.remindersEnabled].publisher.first()) { (value) in
+                        if(remindersEnabled != UserDefaults.standard.bool(forKey: "DayandRemindersEnabled")) {
+                            changesMade = true
+                        }
+                            self.remindersEnabled = value
+                }
+                .toggleStyle(CustomToggle())
+                .frame(width: 31, height: 20)
                 
-                HStack(alignment: .top) {
-                    Toggle("", isOn: $remindersEnabled)
-                        .onReceive([self.remindersEnabled].publisher.first()) { (value) in
-                            if(remindersEnabled != UserDefaults.standard.bool(forKey: "DayandRemindersEnabled")) {
-                                changesMade = true
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Notification reminders")
+                        .fontWeight(.bold)
+                    
+                    Text("Select how often and when you'd like receive notifications to log activity.")
+                        .foregroundColor(Color(.gray))
+                }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                remindersEnabled.toggle()
+            }
+            
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 20) {
+                    HStack {
+                        Text("Every")
+                    
+                        HStack {
+                            TextField("30", text: $cadenceTime)
+                                .textFieldStyle(PlainTextFieldStyle())
+                        }
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 8)
+                        .frame(width: 60, height: 38)
+                        .multilineTextAlignment(.leading)
+                        .foregroundColor(Color(.textColor))
+                        .background(Color("backgroundColor"))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 7)
+                                .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
+                                .shadow(color: Color(.shadowColor).opacity(0.2),
+                                                                radius: 1, x: 0, y: 1)
+                                                  
+                        )
+                        .cornerRadius(9)
+                        
+                        ZStack(alignment: .leading) {
+                            MenuButton("") {
+                                Button(action: {
+                                    reminderCadence = "minutes"
+                                    changesMade = true
+                                }) {
+                                    Text("minutes")
+                                }
+                                
+                                Button(action: {
+                                    reminderCadence = "hours"
+                                    changesMade = true
+                                }) {
+                                    Text("hours")
+                                }
                             }
-                                self.remindersEnabled = value
+                            .contentShape(Rectangle())
+                            .menuButtonStyle(BorderlessButtonMenuButtonStyle())
+                            .frame(width: 132, height: 38, alignment: .trailing)
+                            .background(Image("DownTriangleImage").resizable().frame(width: 24, height: 24).foregroundColor(Color(.textColor)).scaleEffect(0.9).padding(8), alignment: .trailing)
+                            .background(Color("backgroundColor"))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 7)
+                                    .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
+                            )
+                            .cornerRadius(7)
+                            .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
+                            
+                            Text("\(reminderCadence ?? "hours")")
+                                .font(.headline)
+                                .fontWeight(.medium)
+                                .multilineTextAlignment(.center)
+                                .padding(.leading, 11.0)
+                                .allowsHitTesting(false)
+                        }
                     }
                     
-                    VStack(alignment: .leading) {
-                        Text("Some text")
-                            .fontWeight(.bold)
+                    HStack {
+                        Text("Between")
                         
-                        Text("And a bit more text goes here")
-                    }
-                }
-                .onTapGesture {
-                    remindersEnabled.toggle()
-                }
-                
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 20) {
-                        HStack {
-                            Text("Every")
+                        DatePicker(selection: .constant(fromHour), displayedComponents: .hourAndMinute, label: { Text("") })
+                            .datePickerStyle(FieldDatePickerStyle())
+                            .frame(width: 90, height: 38)
+                            .cornerRadius(7)
                         
-                            HStack {
-                                TextField("30", text: $cadenceTime)
-                                    .textFieldStyle(PlainTextFieldStyle())
-                            }
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 8)
-                            .frame(width: 60, height: 38)
-                            .font(.headline)
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color(.textColor))
-                            .background(Color("backgroundColor"))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 7)
-                                    .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
-                                    .shadow(color: Color(red: 192/255, green: 189/255, blue: 191/255),
-                                                                    radius: 1, x: 0, y: 1)
-                                                      
-                            )
-                            .cornerRadius(5)
-                            
-                            ZStack(alignment: .leading) {
-                                MenuButton("") {
-                                    Button(action: {
-                                        reminderCadence = "minutes"
-                                        changesMade = true
-                                    }) {
-                                        Text("minutes")
-                                    }
-                                    
-                                    Button(action: {
-                                        reminderCadence = "hours"
-                                        changesMade = true
-                                    }) {
-                                        Text("hours")
-                                    }
-                                }
-                                .contentShape(Rectangle())
-                                .menuButtonStyle(BorderlessButtonMenuButtonStyle())
-                                .frame(width: 132, height: 38, alignment: .trailing)
-                                .background(Image("DownTriangleImage").resizable().frame(width: 24, height: 24).foregroundColor(Color(.textColor)).scaleEffect(0.9).padding(8), alignment: .trailing)
-                                .background(Color("backgroundColor"))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 9)
-                                        .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
-                                )
-                                .cornerRadius(9)
-                                .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
-                                
-                                Text("\(reminderCadence ?? "hours")")
-                                    .font(.headline)
-                                    .fontWeight(.medium)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.leading, 11.0)
-                                    .allowsHitTesting(false)
-                            }
-                            
-                            Spacer()
-                        }
-                        
-                        HStack {
-                            Text("Between")
-                            
-                            HStack {
-                                DatePicker(selection: .constant(fromHour), displayedComponents: .hourAndMinute, label: { Text("") })
-                                    .datePickerStyle(FieldDatePickerStyle())
-                            }
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 8)
-                            .frame(width: 100, height: 38)
-                            .font(.headline)
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color(.textColor))
-                            .background(Color("backgroundColor"))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 7)
-                                    .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
-                                    .shadow(color: Color(red: 192/255, green: 189/255, blue: 191/255),
-                                                                    radius: 1, x: 0, y: 1)
-                                                      
-                            )
-                            .cornerRadius(5)
-                            
-                            Text("and")
- 
-                            HStack {
-                                DatePicker(selection: .constant(toHour), displayedComponents: .hourAndMinute, label: { Text("") })
-                                    .datePickerStyle(FieldDatePickerStyle())
-                            }
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 8)
-                            .frame(width: 100, height: 38)
-                            .font(.headline)
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color(.textColor))
-                            .background(Color("backgroundColor"))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 7)
-                                    .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
-                                    .shadow(color: Color(red: 192/255, green: 189/255, blue: 191/255),
-                                                                    radius: 1, x: 0, y: 1)
-                                                      
-                            )
-                            .cornerRadius(5)
-                            
-                            Spacer()
-                        }
+                        Text("and")
 
+                        DatePicker(selection: .constant(toHour), displayedComponents: .hourAndMinute, label: { Text("") })
+                            .datePickerStyle(FieldDatePickerStyle())
+                            .frame(width: 90, height: 38)
+                            .cornerRadius(7)
+                        
                         Spacer()
                     }
-                    .frame(minWidth: 200, maxWidth: .infinity, minHeight: 60, maxHeight:.infinity)
-                    .padding()
-                    .background(Color(.textColor).opacity(0.03))
-                    .cornerRadius(9)
-                    .allowsHitTesting(remindersEnabled)
-                    .opacity(remindersEnabled ? 1.0 : 0.5)
                     
-                                    }
-            }
-            .padding(.vertical, 12)
-            
-            Button(action: {
-                DeleteAllEntries()
-            }) {
-                Text("Clear " + GetAllEntries())
-            }.disabled(entries.count > 0 ? false : true)
-            
-            Button(action: {
-                ScheduleNotifications()
-            }) {
-                Text("Do notification!")
+                    Spacer()
+                }
+                .frame(minWidth: 200, maxWidth: .infinity, minHeight: 30, maxHeight:.infinity)
+                .padding()
+                .padding(.leading, 32)
+//                .background(Color(.textColor).opacity(0.03))
+                .cornerRadius(9)
+                .allowsHitTesting(remindersEnabled)
+                .opacity(remindersEnabled ? 1.0 : 0.5)
             }
             
-            Button(action: {
-               UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-            }) {
-                Text("Clear all notifications")
-            }
-            
+            Divider()
             
             // Footer
             
             HStack() {
-                CustomButtonView(title: "Reset Dayand", action: { NSApplication.shared.keyWindow?.close() }, disabledState: false, buttonClass: "Destructive")
+                CustomButtonView(title: "Reset Dayand", action: { showingAlert = true }, disabledState: false, buttonClass: "Destructive").alert(isPresented: $showingAlert) {
+                    Alert(title: Text("Are you sure?"), message: Text("This will reset all settings and remove all saved data. This action cannot be undone."), primaryButton: Alert.Button.default(Text("Reset")) {
+                        
+                        // Would clear all settings and saved data
+                        
+                        ResetTheApp()
+                        
+                    }, secondaryButton: .default(Text("Cancel")))
+                }
                 
                 Spacer()
                 
@@ -213,7 +172,6 @@ struct SettingsView: View {
     }
     
     func GetAllEntries() -> String {
-        
         if entries.isEmpty {
             return "0 activities"
         } else {
@@ -229,26 +187,32 @@ struct SettingsView: View {
         }
     }
     
-    func DeleteAllEntries() {
-//        let center = UNUserNotificationCenter.current()
-//        center.requestAuthorization(options: [.alert, .sound, .badge, .provisional]) { granted, error in
-//
-//            if let error = error {
-//                // Handle the error here.
-//            }
-//
-//            // Provisional authorization granted.
-//        }
+    func ResetTheApp() {
         
-        for index in 0...entries.count-1 {
-            moc.delete(entries[index])
+        // Delete all activity entries
+        
+        if entries.count > 0 {
+            for index in 0...entries.count {
+                moc.delete(entries[index])
+            }
+            try? self.moc.save()
+        } else {
+            print("Nothing to do")
         }
-        try? self.moc.save()
-        print("Done!")
+        
+        // Remove all user settings
         
         if let appDomain = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: appDomain)
         }
+        
+        // Cancel any pending notifications
+        
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        
+        // Close the settings window as confirmation
+        
+        NSApplication.shared.keyWindow?.close()
     }
     
     func ScheduleNotifications() {
@@ -274,36 +238,32 @@ struct SettingsView: View {
                 
                 // Scheduling random times between 6am and 7pm
                 
-                for index in 6...19 {
-        //            let randomHour = Int.random(in: 6..<19)
-                    let randomMinute = Int.random(in: 1..<50)
-                    
-                    var dateComponents = DateComponents()
-                    dateComponents.hour = index
-                    dateComponents.minute = randomMinute
-                    let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
-                    let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-                    center.add(request)
-                    print("Scheduled notification for \(index):\(randomMinute)")
-                }
+//                for index in 6...19 {
+//                    let randomMinute = Int.random(in: 1..<50)
+//
+//                    var dateComponents = DateComponents()
+//                    dateComponents.hour = index
+//                    dateComponents.minute = randomMinute
+//                    let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+//                    let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+//                    center.add(request)
+//                    print("Scheduled notification for \(index):\(randomMinute)")
+//                }
                 
                 // Repeating at a specific time
+                
         //        var dateComponents = DateComponents()
         //        dateComponents.hour = 10
         //        dateComponents.minute = 30
         //        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
 
-                // Show five seconds after created
+                // Scheduling every n minutes
                 
+                let scheduledRecurrance:TimeInterval = 60.0 * (Double(cadenceTime) ?? 1)
                 
-                
-        //        var dateComponents = DateComponents()
-        //        dateComponents.hour = 10
-        //        dateComponents.minute = 30
-        //        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: true)
-        //
-        //        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        //        center.add(request)
+                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: scheduledRecurrance, repeats: true)
+                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+                center.add(request)
             } else {
                 print("D'oh")
             }
@@ -311,7 +271,6 @@ struct SettingsView: View {
     }
     
     func SaveAllChanges() {
-        
         UserDefaults.standard.set(remindersEnabled, forKey: "DayandRemindersEnabled")
         
         if !remindersEnabled {

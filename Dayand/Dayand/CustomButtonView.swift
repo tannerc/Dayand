@@ -12,12 +12,11 @@ struct CustomButtonView: View {
     let action: () -> Void
     let disabledState: Bool?
     let buttonClass: String?
-    var buttonRadius = CGFloat(9.0)
+    var buttonRadius = CGFloat(7.0)
+    @State private var hovered = false
     
     var body: some View {
-        
         switch buttonClass {
-                
             case "Primary":
                 Button(action: action) {
                     Text(title)
@@ -30,6 +29,10 @@ struct CustomButtonView: View {
                         .background(Color(.systemBlue))
                         .cornerRadius(buttonRadius)
                         .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
+                        .onHover {_ in self.hovered.toggle() }
+                        .overlay (
+                            RoundedRectangle(cornerRadius: buttonRadius)
+                        ).foregroundColor(Color(.textColor).opacity(hovered ? 0.1 : 0))
                 }
                 .buttonStyle(PlainButtonStyle())
                 .disabled(disabledState ?? false)
@@ -46,10 +49,14 @@ struct CustomButtonView: View {
                         .background(Color("backgroundColor"))
                         .overlay(
                             RoundedRectangle(cornerRadius: buttonRadius)
-                                .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
+                                .stroke(Color(.systemGray).opacity(hovered ? 0.6 : 0.4), lineWidth: 1)
                         )
                         .cornerRadius(buttonRadius)
                         .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
+                        .onHover {_ in self.hovered.toggle() }
+                        .overlay (
+                            RoundedRectangle(cornerRadius: buttonRadius)
+                        ).foregroundColor(Color(.textColor).opacity(hovered ? 0.02 : 0))
                 }
                 .buttonStyle(PlainButtonStyle())
                 .disabled(disabledState ?? false)
@@ -66,10 +73,14 @@ struct CustomButtonView: View {
                         .background(Color("backgroundColor"))
                         .overlay(
                             RoundedRectangle(cornerRadius: buttonRadius)
-                                .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
+                                .stroke(Color(.systemGray).opacity(hovered ? 0.6 : 0.4), lineWidth: 1)
                         )
                         .cornerRadius(buttonRadius)
                         .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
+                        .onHover {_ in self.hovered.toggle() }
+                        .overlay (
+                            RoundedRectangle(cornerRadius: buttonRadius)
+                        ).foregroundColor(Color(.textColor).opacity(hovered ? 0.02 : 0))
                 }
                 .buttonStyle(PlainButtonStyle())
                 .disabled(disabledState ?? false)

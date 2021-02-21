@@ -10,6 +10,8 @@ import AppKit
 import CoreData
 
 struct ContentView: View {
+    @State private var hovered = false
+    
     @Environment(\.openURL) var openURL
     @Environment(\.managedObjectContext) var moc
     
@@ -109,10 +111,12 @@ struct ContentView: View {
                     .padding(20)
                     .font(.body)
                     .foregroundColor(Color(.textColor))
-                    .background(Color(.textColor).opacity(0.04))
-                    .cornerRadius(6)
+                    .background(Color(.textColor).opacity(hovered ? 0.06 : 0.04))
+                    .cornerRadius(7)
                     .disabled(entrySubmitted)
-                
+                    .onHover {_ in
+                        self.hovered.toggle()
+                    }
                 
                 /*
                  Here we're pulling from the responseDictionary to create a series of response buttons.
@@ -145,6 +149,8 @@ struct ContentView: View {
             .padding(0)
             .frame(width: 400.0, height: 170.0, alignment: .top)
             .background(Color("backgroundColor"))
+            
+            // Show a confirmation message when an activity is logged
             
             if(entrySubmitted){
                 VStack() {
@@ -199,7 +205,7 @@ struct ContentView: View {
         // Seconds don't display in the UI, but they are logged for reporting and sorting purposes
         
         let fullTimeFormatter = DateFormatter()
-        fullTimeFormatter.dateFormat = "yyyyMMddhhmmss"
+        fullTimeFormatter.dateFormat = "yyyyMMddHHmmss"
         let loggedTime = fullTimeFormatter.string(from: Date())
         
         
@@ -212,7 +218,7 @@ struct ContentView: View {
         entry.time = Int32(logTime) ?? 0
         entry.logdate = Int64(loggedTime) ?? 0
         entry.response = Int32(response)
-        entry.message = textEntry
+        entry.activity = textEntry
         try? self.moc.save()
         
         // Animate everything out, but do it carefully for reasons
