@@ -11,51 +11,96 @@ struct ChartUIView: View {
     var chartdata: [String: Int32]
     @Binding var scrollTarget: Int?
     
+    let responseDic = ["😡" : "1",
+                       "☹️" : "2",
+                       "😐" : "3",
+                       "🙂" : "4",
+                       "😄" : "5",
+    ]
+    
     var body: some View {
+        let keys = responseDic.map{$0.key}
+        
         HStack {
             ZStack {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading) {
+                        ForEach(0..<keys.count) { i in
+                            Text("\(keys[i])")
+                            
+                            Spacer()
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                
                 VStack {
                     ForEach(0..<5) { i in
-                        Divider().background((Color(.lightGray)).opacity(0.02))
+                        Divider()
+                            .background(Color(.systemGray).opacity(0.05))
+                            .padding(8)
+                            .padding(.leading, 20)
+                        Rectangle()
+                            .strokeBorder(Color(.systemBlue).opacity(0.3), style: StrokeStyle(lineWidth: 1, dash: [12]))
+                            .frame(maxWidth: .infinity, maxHeight: 1)
+                            .opacity(i == GetMedian() ? 1.0 : 0)
+                        
                         Spacer()
                     }
                 }
                 
                 HStack {
                     ForEach(chartdata.keys.sorted(), id: \.self) { key in
-                        ChartColumn(columnHeight: self.chartdata[key] ?? 0, columnKey: key)
+                        ChartColumn(columnHeight: self.chartdata[key] ?? 0, columnKey: key, columnRoundness: chartdata.count)
                             .onTapGesture {
                                 scrollTarget = (chartdata.count-1) - (Array(chartdata.keys.sorted(by: <)).firstIndex(of: key) ?? 0)
                             }
                     }
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: 200)
+            .frame(maxWidth: .infinity, maxHeight: 240)
             .padding()
-            .padding(.bottom, -10)
-            .background(Color(.textColor).opacity(0.03))
+            .padding(.bottom, -30)
+            .background(Color(.textColor).opacity(0.02))
             .cornerRadius(9)
         }
         .padding(.horizontal, 20)
+        .cornerRadius(9)
+    }
+    
+    func GetMedian() -> Int32 {
+        let values = chartdata.map { $0.value }
+        var thevalue = values.reduce(0, +)
+        thevalue = 5 - thevalue
+        
+        return Int32(thevalue)
     }
     
     struct ChartColumn: View {
         @State private var hovered = false
         var columnHeight = Int32()
         var columnKey = String()
+        var columnRoundness = Int()
         
         var body: some View {
             VStack {
                 Spacer()
                 
                 Rectangle()
-                    .fill(VariableHeightColor(forHeight: Int32(columnHeight)))
+//                    .fill(VariableHeightColor(forHeight: Int32(columnHeight)))
+                    .fill(LinearGradient(
+                          gradient: .init(colors: [Color(red: 20 / 255, green: 208 / 255, blue: 174 / 255),
+                                                   Color(red: 65 / 255, green: 156 / 255, blue: 241 / 255)]),
+                          startPoint: .init(x: 0.5, y: 0),
+                          endPoint: .init(x: 0.5, y: 0.6)
+                        ))
                     .frame(minWidth: 1,
                            maxWidth: .infinity,
                            minHeight: 1,
-                           maxHeight: CGFloat(columnHeight) * 140 + 1)
+                           maxHeight: CGFloat(columnHeight) * 50 + 1)
                     .padding(EdgeInsets(top: 0, leading: 0, bottom: CGFloat(3), trailing: 0))
-                    .clipShape(RoundedRectangle(cornerRadius: CGFloat(3), style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: CGFloat(columnRoundness), style: .continuous))
                 
 //                    Text("\(FormatDate(whichdate: columnKey))")
 //                        .font(.footnote)

@@ -43,11 +43,11 @@ struct ActivityView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
         let fromDate = dateFormatter.string(from: Date())
-        let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (90 * -1), to: Date()) ?? Date())
+        let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (1200 * -1), to: Date()) ?? Date())
                 
         var predicate: NSPredicate?
         predicate = NSPredicate(format: "(date >= %@) AND (date <= %@)", toDate, fromDate)
-
+        
         self._lastndays = FetchRequest(
             entity: Dataobject.entity(),
             sortDescriptors: [NSSortDescriptor(keyPath: \Dataobject.logdate, ascending: false)],
@@ -56,15 +56,6 @@ struct ActivityView: View {
     
     var lastndaysArray = [String: Int]()
     @State private var rowHovered = false
-    
-    // For checking responses
-    
-    let responseDic = ["😡" : "0",
-                       "☹️" : "1",
-                       "😐" : "2",
-                       "🙂" : "3",
-                       "😄" : "4",
-    ]
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -82,6 +73,10 @@ struct ActivityView: View {
                 
                 ZStack(alignment: .leading) {
                     MenuButton("") {
+                        Button(action: {ChangeChartRange(to: 1)}, label: {
+                            Text("Today")
+                        })
+                        
                         Button(action: {ChangeChartRange(to: 7)}, label: {
                             Text("7 days")
                         })
@@ -114,7 +109,7 @@ struct ActivityView: View {
                     .cornerRadius(7)
                     .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
 
-                    Text("\(daysToChart) Days")
+                    Text(daysToChart == 1 ? "Today" : "\(daysToChart) Days")
                         .font(.headline)
                         .fontWeight(.medium)
                         .multilineTextAlignment(.center)
@@ -143,27 +138,26 @@ struct ActivityView: View {
                     Text("Date")
                         .font(.headline)
                         .multilineTextAlignment(.leading)
-                        .frame(width: 100)
+                        .frame(minWidth: 120, minHeight: 30, alignment: .leading)
                     
                     Text("Time")
                         .font(.headline)
                         .multilineTextAlignment(.leading)
-                        .frame(width: 60)
+                        .frame(minWidth: 80, minHeight: 30, alignment: .leading)
                     
                     Text("Response")
                         .font(.headline)
                         .multilineTextAlignment(.leading)
-                        .frame(width: 80)
+                        .frame(minWidth: 80, minHeight: 30, alignment: .leading)
                     
                     Text("Activity")
                         .font(.headline)
                         .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    
-                    Spacer()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 }
+                .padding()
                 .frame(maxWidth: .infinity, maxHeight: 30)
-                .background(Color(.textColor).opacity(0.02))
+                .background(Color("backgroundColor"))
                 
                 Divider().background((Color(.lightGray)).opacity(0.02))
                 
@@ -176,9 +170,8 @@ struct ActivityView: View {
                                 TableRow(withDate: loggedentry.logdate, withResponse: loggedentry.response, withActivity: loggedentry.activity ?? "No activity", theObject: loggedentry)
                                 Divider().background((Color(.lightGray)).opacity(0.02))
                             }
-                        }
-                        .onChange(of: scrollTarget) { target in
-                            
+                        }.onChange(of: scrollTarget) { target in
+                                                        
                             // Detects if scrollTarget variable has been changed from the ChartUIView
                             // If scrollTarget has been changed, scrolls to the appropriate location within the ScrollViewReader
                             
@@ -201,8 +194,7 @@ struct ActivityView: View {
             )
             .cornerRadius(7)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 12)
+            .padding(20)
             .listRowBackground(Color("backgroundColor"))
             
             Spacer()
@@ -244,54 +236,77 @@ struct ActivityView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMdd"
         
-        var lastndaysArray = [String: Int32]()
+        var lastNEntriesArray = [String: Int32]()
         
         if daysToChart < 1 {
             daysToChart = 7
         }
         
-        for index in 0...(daysToChart) {
-            let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (index * -1), to: Date()) ?? Date())
-            lastndaysArray[toDate] = 0
-        }
-        
-        let sortedArrayKeys = Array(lastndaysArray.keys.sorted(by: <))
-        
-        for index in 0...(daysToChart) {
-            if (lastndays.count > index) {
-                if(sortedArrayKeys.contains(String(lastndays[index].date))){
-                    
-                    // Logged day is within the time range to chart
-                    // Get the response and set it as an average...
-                    
-                    let existingAvg = lastndaysArray[String(lastndays[index].date)] ?? 0
-                    let indexAvg = lastndays[index].response
-                    var newAvg = Int32(0)
-                    
-                    if existingAvg == 0 {
-                        
-                        // No existing average for the date, set the new average to this index to start calculating (if there are multiple inputs for a single day)
-                        
-                        newAvg = Int32(Int(indexAvg))
-                    } else {
-                        
-                        // Existing average greater than zero, do some math
-                        
-                        let themath = (existingAvg + indexAvg)
-                        newAvg = (themath / 2)
-                    }
-                    
-                    lastndaysArray[String(lastndays[index].date)] = Int32(newAvg)
-                } else {
-                    
-                    // No day logged within time range, report zero
-                                        
-                    lastndaysArray[String(lastndays[index].date)] = 0
-                }
+        if (daysToChart == 1) {
+            let toDate = dateFormatter.string(from: Date())
+            lastNEntriesArray[toDate] = 0
+        } else {
+            for index in 0...(daysToChart) {
+                let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (index * -1), to: Date()) ?? Date())
+                lastNEntriesArray[toDate] = 0
             }
         }
         
-        return ChartUIView(chartdata: lastndaysArray, scrollTarget: self.$scrollTarget)
+        let sortedArrayKeys = Array(lastNEntriesArray.keys.sorted(by: <))
+        
+        if (daysToChart == 1) {
+            
+            // Charting today only
+                        
+            for indexnew in 0...(lastndays.count-1) {
+                if(sortedArrayKeys.contains(String(lastndays[indexnew].date))){
+                    lastNEntriesArray[String("\([lastndays.count-indexnew])")] = Int32(lastndays[indexnew].response)
+                }
+            }
+                                    
+        } else {
+            
+            print("Charting \(sortedArrayKeys)")
+            
+            for index in 0...(daysToChart) {
+                if (lastndays.count > index) {
+                    if(sortedArrayKeys.contains(String(lastndays[index].date))){
+                        
+                        print("Checking \(lastndays[index].date)")
+                        
+                        // Logged day is within the time range to chart
+                        // Get the response and set it as an average...
+        
+                        let existingAvg = lastNEntriesArray[String(lastndays[index].date)] ?? 0
+                        let indexAvg = lastndays[index].response
+                        var newAvg = Int32(0)
+                        
+                        if existingAvg == 0 {
+                            
+                            // No existing average for the date, set the new average to this index to start calculating (if there are multiple inputs for a single day)
+                            
+                            newAvg = Int32(Int(indexAvg))
+                        } else {
+                            
+                            // Existing average greater than zero, do some math
+                            
+                            let themath = (existingAvg + indexAvg)
+                            newAvg = (themath / 2)
+                        }
+                        
+                        lastNEntriesArray[String(lastndays[index].date)] = Int32(newAvg)
+                        
+                    } else {
+                        
+                        // No day logged within time range, report zero
+                                            
+                        lastNEntriesArray[String(lastndays[index].date)] = 0
+                    }
+                }
+            }
+        }
+                
+        return ChartUIView(chartdata: lastNEntriesArray, scrollTarget: self.$scrollTarget)
     }
     
     // Export to PDF... of course
@@ -345,24 +360,22 @@ struct TableRow: View {
     var theObject: Dataobject
     
     var body: some View {
-        HStack(spacing: 16) {
-            HStack(alignment: .center, spacing: 0) {
-                Text(ConvertLogDate(thedate: withDate))
-                    .multilineTextAlignment(.leading)
-                    .frame(width: 100)
-                
-                Text(ConvertLogTime(thetime: withDate))
-                    .multilineTextAlignment(.leading)
-                    .frame(width: 60)
-                
-                Text(String(withResponse))
-                    .multilineTextAlignment(.leading)
-                    .frame(width: 80)
-                
-                Text(withActivity)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
+        HStack(spacing: 0) {
+            Text(ConvertLogDate(thedate: withDate))
+                .multilineTextAlignment(.leading)
+                .frame(minWidth: 120, minHeight: 30, alignment: .leading)
+            
+            Text(ConvertLogTime(thetime: withDate))
+                .multilineTextAlignment(.leading)
+                .frame(minWidth: 80, minHeight: 30, alignment: .leading)
+            
+            Text(GetResponseEmoji(forResponse: String(withResponse)))
+                .multilineTextAlignment(.center)
+                .frame(minWidth: 90, minHeight: 30, alignment: .center)
+            
+            Text(withActivity)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             
             MenuButton("") {
                 Button(action: {
@@ -393,9 +406,27 @@ struct TableRow: View {
             
             Spacer()
         }
-        .padding(8)
+        .padding()
         .background(Color(.textColor).opacity(self.hovered ? 0.01 : 0))
         .onHover {_ in self.hovered.toggle() }
+    }
+    
+    func GetResponseEmoji(forResponse: String) -> String{
+        
+        // For checking responses
+        
+        let responseDic = ["😡" : "1",
+                           "☹️" : "2",
+                           "😐" : "3",
+                           "🙂" : "4",
+                           "😄" : "5",
+        ]
+        
+        let values = responseDic.values
+        let keys = responseDic.keys
+        let indexed = values.firstIndex(of: forResponse)!
+        
+        return keys[indexed]
     }
     
     // Useful function for converting the date of our data

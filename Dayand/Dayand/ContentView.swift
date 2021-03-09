@@ -23,6 +23,16 @@ struct ContentView: View {
 
     @State var entryString: String = ""
     @State private var entrySubmitted = false
+    
+    var winControl = NSWindowController.self
+    var activityWindow = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 700, height: 625),
+        styleMask: [.titled, .closable, .resizable],
+        backing: .buffered, defer: false)
+    var settingsWindow = NSWindow(
+        contentRect: NSRect(x: 0, y: 0, width: 700, height: 600),
+        styleMask: [.titled, .closable],
+        backing: .buffered, defer: false)
         
     static let entryDateFormat: DateFormatter = {
             let formatter = DateFormatter()
@@ -111,7 +121,7 @@ struct ContentView: View {
                     .padding(20)
                     .font(.body)
                     .foregroundColor(Color(.textColor))
-                    .background(Color(.textColor).opacity(hovered ? 0.06 : 0.04))
+                    .background(Color(.textColor).opacity(hovered ? 0.05 : 0.03))
                     .cornerRadius(7)
                     .disabled(entrySubmitted)
                     .onHover {_ in
@@ -140,7 +150,7 @@ struct ContentView: View {
                                 .background(Color("backgroundColor"))
                         }
                         .buttonStyle(PlainButtonStyle())
-                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 20)
+                        .frame(minWidth: 20, maxWidth: .infinity, minHeight: 20)
                     }
                 }
                 .padding(.horizontal, 40)
@@ -156,6 +166,7 @@ struct ContentView: View {
                 VStack() {
                     Text("Saved!")
                         .font(.title)
+                        .fontWeight(.medium)
                         .multilineTextAlignment(.center)
                         .foregroundColor(Color("backgroundColor"))
                 }
@@ -246,53 +257,44 @@ struct ContentView: View {
     // Open settings view in a new window object
 
     func DisplaySettingsWindow() {
-        var window: NSWindow!
         let contentView = SettingsView().environment(\.managedObjectContext, moc)
 
         // Create the window and set the content view.
         
-        window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 700, height: 600),
-            styleMask: [.titled, .closable],
-            backing: .buffered, defer: false)
-        window.center()
-        window.styleMask.remove(.resizable)
-        window.titlebarAppearsTransparent = true
-        window.styleMask.insert(.fullSizeContentView)
-        window.titleVisibility = .hidden
-        window.title = "Dayand Settings"
-        window.setFrameAutosaveName("Settings Window")
-        window.backgroundColor = NSColor(Color("backgroundColor"))
-        window.contentView = NSHostingView(rootView: contentView)
-        window.makeKeyAndOrderFront(window.self)
+//        settingsWindow.center()
+        settingsWindow.styleMask.remove(.resizable)
+        settingsWindow.titlebarAppearsTransparent = true
+        settingsWindow.styleMask.insert(.fullSizeContentView)
+        settingsWindow.titleVisibility = .hidden
+        settingsWindow.title = "Dayand Settings"
+        settingsWindow.setFrameAutosaveName("Settings Window")
+        settingsWindow.backgroundColor = NSColor(Color("backgroundColor"))
+        settingsWindow.contentView = NSHostingView(rootView: contentView)
+        settingsWindow.makeKeyAndOrderFront(settingsWindow.self)
         NSApp.activate(ignoringOtherApps: true)
-        window.isReleasedWhenClosed = false
+        settingsWindow.isReleasedWhenClosed = false
     }
     
     // Open activity view in a new window object
 
     func DisplayActivityWindow() {
-        var window: NSWindow!
         let contentView = ActivityView().environment(\.managedObjectContext, moc)
             .frame(minWidth: 700, minHeight: 625)
 
         // Create the window and set the content view.
         
-        window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 700, height: 625),
-            styleMask: [.titled, .closable, .resizable],
-            backing: .buffered, defer: false)
-        window.center()
-        window.titlebarAppearsTransparent = true
-        window.styleMask.insert(.fullSizeContentView)
-//        window.title = "Activity Log"
-        window.setFrameAutosaveName("Activity Window")
-        window.backgroundColor = NSColor(Color("backgroundColor"))
-        window.contentView = NSHostingView(rootView: contentView)
-        window.makeKeyAndOrderFront(window.self)
-        window.minSize = NSSize(width: 700, height: 625)
+//        activityWindow.center()
+        activityWindow.titlebarAppearsTransparent = true
+        activityWindow.styleMask.insert(.fullSizeContentView)
+    //        window.title = "Activity Log"
+        activityWindow.setFrameAutosaveName("Activity Window")
+        activityWindow.backgroundColor = NSColor(Color("backgroundColor"))
+        activityWindow.contentView = NSHostingView(rootView: contentView)
+        activityWindow.makeKeyAndOrderFront(activityWindow.self)
+        activityWindow.minSize = NSSize(width: 700, height: 625)
         NSApp.activate(ignoringOtherApps: true)
-        window.isReleasedWhenClosed = false
+        activityWindow.isReleasedWhenClosed = false
+        
     }
 }
 
