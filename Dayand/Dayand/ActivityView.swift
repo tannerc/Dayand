@@ -359,6 +359,8 @@ struct TableRow: View {
     var withActivity: String
     var theObject: Dataobject
     
+    let responseArr = ["😡", "☹️", "😐", "🙂", "😄"]
+    
     var body: some View {
         HStack(spacing: 0) {
             Text(ConvertLogDate(thedate: withDate))
@@ -369,7 +371,7 @@ struct TableRow: View {
                 .multilineTextAlignment(.leading)
                 .frame(minWidth: 80, minHeight: 30, alignment: .leading)
             
-            Text(GetResponseEmoji(forResponse: String(withResponse)))
+            Text(responseArr[Int(withResponse-1)])
                 .multilineTextAlignment(.center)
                 .frame(minWidth: 90, minHeight: 30, alignment: .center)
             
@@ -395,12 +397,12 @@ struct TableRow: View {
             .frame(width: 32, height: 32, alignment: .center)
             .background(Image("OverflowIconImage").resizable().frame(width: 26, height: 26).foregroundColor(Color(.textColor).opacity(0.8)).padding(8), alignment: .center)
             .background(Color("backgroundColor"))
-            .overlay(
-                RoundedRectangle(cornerRadius: 7)
-                    .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
-            )
-            .cornerRadius(7)
-            .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
+//            .overlay(
+//                RoundedRectangle(cornerRadius: 7)
+//                    .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
+//            )
+//            .cornerRadius(7)
+//            .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
             .opacity(self.hovered ? 1.0 : 0)
             .disabled(self.hovered ? false : true)
             
@@ -409,24 +411,6 @@ struct TableRow: View {
         .padding()
         .background(Color(.textColor).opacity(self.hovered ? 0.01 : 0))
         .onHover {_ in self.hovered.toggle() }
-    }
-    
-    func GetResponseEmoji(forResponse: String) -> String{
-        
-        // For checking responses
-        
-        let responseDic = ["😡" : "1",
-                           "☹️" : "2",
-                           "😐" : "3",
-                           "🙂" : "4",
-                           "😄" : "5",
-        ]
-        
-        let values = responseDic.values
-        let keys = responseDic.keys
-        let indexed = values.firstIndex(of: forResponse)!
-        
-        return keys[indexed]
     }
     
     // Useful function for converting the date of our data

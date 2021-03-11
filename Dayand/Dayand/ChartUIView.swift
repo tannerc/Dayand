@@ -11,22 +11,15 @@ struct ChartUIView: View {
     var chartdata: [String: Int32]
     @Binding var scrollTarget: Int?
     
-    let responseDic = ["😡" : "1",
-                       "☹️" : "2",
-                       "😐" : "3",
-                       "🙂" : "4",
-                       "😄" : "5",
-    ]
+    let responseArr = ["😡", "☹️", "😐", "🙂", "😄"]
     
     var body: some View {
-        let keys = responseDic.map{$0.key}
-        
         HStack {
             ZStack {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading) {
-                        ForEach(0..<keys.count) { i in
-                            Text("\(keys[i])")
+                        ForEach(0..<responseArr.count) { i in
+                            Text("\(responseArr.reversed()[i])")
                             
                             Spacer()
                         }
@@ -62,7 +55,7 @@ struct ChartUIView: View {
             .frame(maxWidth: .infinity, maxHeight: 240)
             .padding()
             .padding(.bottom, -30)
-            .background(Color(.textColor).opacity(0.02))
+            .background(Color(.textColor).opacity(0.05))
             .cornerRadius(9)
         }
         .padding(.horizontal, 20)
@@ -90,8 +83,8 @@ struct ChartUIView: View {
                 Rectangle()
 //                    .fill(VariableHeightColor(forHeight: Int32(columnHeight)))
                     .fill(LinearGradient(
-                          gradient: .init(colors: [Color(red: 20 / 255, green: 208 / 255, blue: 174 / 255),
-                                                   Color(red: 65 / 255, green: 156 / 255, blue: 241 / 255)]),
+                          gradient: .init(colors: [Color(red: 33 / 255, green: 166 / 255, blue: 210 / 255),
+                                                   Color(red: 47 / 255, green: 124 / 255, blue: 246 / 255)]),
                           startPoint: .init(x: 0.5, y: 0),
                           endPoint: .init(x: 0.5, y: 0.6)
                         ))

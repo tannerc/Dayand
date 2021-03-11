@@ -11,9 +11,11 @@ import CoreData
 
 struct ContentView: View {
     @State private var hovered = false
+    @Namespace var exampleNamespace
     
     @Environment(\.openURL) var openURL
     @Environment(\.managedObjectContext) var moc
+    //var moc = NSManagedObjectContext.init(concurrencyType: .privateQueueConcurrencyType)
     
     @FetchRequest(entity: Dataobject.entity(),
                   sortDescriptors:
@@ -42,12 +44,7 @@ struct ContentView: View {
     
     // This is the response dictionary, it can be customized to have fewer or more items, each should map to an int value for analytics.
     
-    let responseDic = ["😡" : "1",
-                       "☹️" : "2",
-                       "😐" : "3",
-                       "🙂" : "4",
-                       "😄" : "5",
-    ]
+    let responseArr = ["😡", "☹️", "😐", "🙂", "😄"]
     
     var body: some View {
         
@@ -121,7 +118,7 @@ struct ContentView: View {
                     .padding(20)
                     .font(.body)
                     .foregroundColor(Color(.textColor))
-                    .background(Color(.textColor).opacity(hovered ? 0.05 : 0.03))
+                    .background(Color(.textColor).opacity(hovered && !entrySubmitted ? 0.05 : 0.03))
                     .cornerRadius(7)
                     .disabled(entrySubmitted)
                     .onHover {_ in
@@ -129,7 +126,7 @@ struct ContentView: View {
                     }
                 
                 /*
-                 Here we're pulling from the responseDictionary to create a series of response buttons.
+                 Here we're pulling from the responseArray to create a series of response buttons.
                  
                  Our response buttons are put into an HStack to create a clean layout that scales according to the number of responses listed in the responseDictionary.
                  
@@ -138,11 +135,11 @@ struct ContentView: View {
                 
                 HStack(alignment: .center, spacing: 0) {
                     
-                    ForEach(responseDic.sorted(by: { $0.value < $1.value }), id: \.key) { key, value in
+                    ForEach(Array(responseArr.enumerated()), id: \.offset) { index, response in
                         Button(action: {
-                            LogEntry(textEntry: entryString, response: Int(value) ?? 0)
+                            LogEntry(response: (index+1))
                         }) {
-                            Text(key)
+                            Text(responseArr[index])
                                 .font(.title)
                                 .contentShape(Rectangle())
                                 .padding()
@@ -172,7 +169,7 @@ struct ContentView: View {
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
                 .background(Color(.textColor).opacity(0.4))
-                .animation(.easeInOut(duration: 1.2))
+                .animation(.easeInOut(duration: 1))
                 .scaleEffect()
             }
         }
@@ -198,7 +195,7 @@ struct ContentView: View {
     
     // Function to log the entry and response.
     
-    func LogEntry(textEntry: String, response: Int) {
+    func LogEntry(response: Int) {
         entrySubmitted = true
         
         // Format date
@@ -219,9 +216,7 @@ struct ContentView: View {
         fullTimeFormatter.dateFormat = "yyyyMMddHHmmss"
         let loggedTime = fullTimeFormatter.string(from: Date())
         
-        
-        print("Would log \(textEntry) with response \(response) for \(loggedTime)")
-        entryString = ""
+        print("Would log \(entryString) with response \(response) for \(loggedTime)")
         
         let entry = Dataobject(context: self.moc)
         entry.id = UUID()
@@ -229,15 +224,24 @@ struct ContentView: View {
         entry.time = Int32(logTime) ?? 0
         entry.logdate = Int64(loggedTime) ?? 0
         entry.response = Int32(response)
-        entry.activity = textEntry
-        try? self.moc.save()
+        entry.activity = entryString
+        
+        if (moc.hasChanges) {
+            do {
+                try self.moc.save()
+            } catch {
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            }
+        }
         
         // Animate everything out, but do it carefully for reasons
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             NSApplication.shared.keyWindow?.close()
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 entrySubmitted = false
+                entryString = ""
             }
         }
         
@@ -261,7 +265,7 @@ struct ContentView: View {
 
         // Create the window and set the content view.
         
-//        settingsWindow.center()
+        settingsWindow.center()
         settingsWindow.styleMask.remove(.resizable)
         settingsWindow.titlebarAppearsTransparent = true
         settingsWindow.styleMask.insert(.fullSizeContentView)
@@ -283,10 +287,9 @@ struct ContentView: View {
 
         // Create the window and set the content view.
         
-//        activityWindow.center()
+        activityWindow.center()
         activityWindow.titlebarAppearsTransparent = true
         activityWindow.styleMask.insert(.fullSizeContentView)
-    //        window.title = "Activity Log"
         activityWindow.setFrameAutosaveName("Activity Window")
         activityWindow.backgroundColor = NSColor(Color("backgroundColor"))
         activityWindow.contentView = NSHostingView(rootView: contentView)

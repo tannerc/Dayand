@@ -59,19 +59,23 @@ struct SettingsView: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 20) {
                         HStack {
-                            Text("Between")
-                            
-                            DatePicker(selection: $reminderStart, displayedComponents: .hourAndMinute, label: { Text("") })
-                                .datePickerStyle(FieldDatePickerStyle())
-                                .frame(width: 90, height: 38)
-                                .cornerRadius(7)
-                            
-                            Text("and")
+                            Group {
+                                Text("Between")
+                                
+                                DatePicker(selection: $reminderStart, displayedComponents: .hourAndMinute, label: { Text("") })
+                                    .datePickerStyle(FieldDatePickerStyle())
+                                    .frame(width: 90, height: 38)
+                                    .cornerRadius(7)
+                                    .focusable()
+                                
+                                Text("and")
 
-                            DatePicker(selection: $reminderEnd, displayedComponents: .hourAndMinute, label: { Text("") })
-                                .datePickerStyle(FieldDatePickerStyle())
-                                .frame(width: 90, height: 38)
-                                .cornerRadius(7)
+                                DatePicker(selection: $reminderEnd, displayedComponents: .hourAndMinute, label: { Text("") })
+                                    .datePickerStyle(FieldDatePickerStyle())
+                                    .frame(width: 90, height: 38)
+                                    .cornerRadius(7)
+                                    .focusable()
+                            }
                             
                             Spacer()
                         }
@@ -144,7 +148,14 @@ struct SettingsView: View {
             for index in 0...entries.count-1 {
                 moc.delete(entries[index])
             }
-            try? self.moc.save()
+            
+            do {
+                if (moc.hasChanges) {
+                    try self.moc.save()
+                }
+            } catch {
+                // handle the Core Data error
+            }
         } else {
             print("1. Nothing to do")
         }

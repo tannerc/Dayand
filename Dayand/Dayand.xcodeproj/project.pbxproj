@@ -12,6 +12,7 @@
 		435801C625E1DA350036CF5B /* CustomToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435801C525E1DA350036CF5B /* CustomToggle.swift */; };
 		43637C3825BDEE8E00FC674C /* Dayand.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 43637C3625BDEE8E00FC674C /* Dayand.xcdatamodeld */; };
 		436BC6AE25D8916D00594A7C /* CustomButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436BC6AD25D8916D00594A7C /* CustomButtonView.swift */; };
+		4384EDAA25FA81E200C90CB4 /*  PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4384EDA925FA81E200C90CB4 /*  PersistenceController.swift */; };
 		4390A27125BCAE6400654115 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4390A27025BCAE6400654115 /* AppDelegate.swift */; };
 		4390A27325BCAE6400654115 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4390A27225BCAE6400654115 /* ContentView.swift */; };
 		4390A27525BCAE6400654115 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4390A27425BCAE6400654115 /* Assets.xcassets */; };
@@ -30,6 +31,7 @@
 		435801C525E1DA350036CF5B /* CustomToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomToggle.swift; sourceTree = "<group>"; };
 		43637C3725BDEE8E00FC674C /* Dayand.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Dayand.xcdatamodel; sourceTree = "<group>"; };
 		436BC6AD25D8916D00594A7C /* CustomButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomButtonView.swift; sourceTree = "<group>"; };
+		4384EDA925FA81E200C90CB4 /*  PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = " PersistenceController.swift"; sourceTree = "<group>"; };
 		4390A26D25BCAE6400654115 /* Dayand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dayand.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4390A27025BCAE6400654115 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4390A27225BCAE6400654115 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 				4390A27425BCAE6400654115 /* Assets.xcassets */,
 				4390A28425BCAED200654115 /* StatusBarController.swift */,
 				4390A28925BCB0E100654115 /* EventsController.swift */,
+				4384EDA925FA81E200C90CB4 /*  PersistenceController.swift */,
 				4390A27925BCAE6400654115 /* Main.storyboard */,
 				4390A27C25BCAE6400654115 /* Info.plist */,
 				43637C3625BDEE8E00FC674C /* Dayand.xcdatamodeld */,
@@ -185,6 +188,7 @@
 				4304FF4025BFAB1400C46EDB /* ActivityView.swift in Sources */,
 				4390A29825BCB53100654115 /* LogViewController.swift in Sources */,
 				4390A27125BCAE6400654115 /* AppDelegate.swift in Sources */,
+				4384EDAA25FA81E200C90CB4 /*  PersistenceController.swift in Sources */,
 				4390A29325BCB31E00654115 /* MainViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
