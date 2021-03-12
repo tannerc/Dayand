@@ -694,18 +694,5 @@
             </objects>
             <point key="canvasLocation" x="74" y="481"/>
         </scene>
-        <!--Log View Controller-->
-        <scene sceneID="8bh-bU-dbo">
-            <objects>
-                <viewController id="WH2-9Q-tyk" customClass="LogViewController" customModule="Dayand" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="cY0-ku-jz6">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </view>
-                </viewController>
-                <customObject id="t33-w3-yZd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="702" y="481"/>
-        </scene>
     </scenes>
 </document>

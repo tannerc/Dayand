@@ -168,6 +168,7 @@ struct ActivityView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             ForEach(entries, id: \.self) { (loggedentry: Dataobject) in
                                 TableRow(withDate: loggedentry.logdate, withResponse: loggedentry.response, withActivity: loggedentry.activity ?? "No activity", theObject: loggedentry)
+                                    .id(entries.firstIndex(of: loggedentry) ?? 0)
                                 Divider().background((Color(.lightGray)).opacity(0.02))
                             }
                         }

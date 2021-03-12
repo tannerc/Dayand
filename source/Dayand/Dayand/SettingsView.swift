@@ -189,7 +189,7 @@ struct SettingsView: View {
         
         print("Attempting to schedule notifs...")
         
-        center.requestAuthorization(options: [.alert, .sound]) { (granted, error) in
+        center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
             if granted {
                 remindersEnabled = true
                 
@@ -198,7 +198,7 @@ struct SettingsView: View {
                 let content = UNMutableNotificationContent()
                 content.title = "Time to log activity"
                 content.body = "Use Dayand to log what you're doing now and your reaction to it."
-                content.categoryIdentifier = "alarm"
+                content.categoryIdentifier = "dayandreminder"
                 content.sound = UNNotificationSound.default
                 
                 // Scheduling random minutes between the times set by reminderStart and reminderEnd
@@ -252,7 +252,7 @@ struct SettingsView: View {
                     }
                 }
             } else {
-                Alert(title: Text("Notifications not enabled"), message: Text("Dayand does not have permission to enable notifications. Please check your system settings to continue."), dismissButton: .default(Text("Ok")))
+//                Alert(title: Text("Notifications not enabled"), message: Text("Dayand does not have permission to enable notifications. Please check your system settings to continue."), dismissButton: .default(Text("Ok")))
                 remindersEnabled = false
             }
         }

@@ -35,24 +35,25 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         center.delegate = self
 
         let show = UNNotificationAction(identifier: "show", title: "Open Dayand", options: .foreground)
-        let category = UNNotificationCategory(identifier: "alarm", actions: [show], intentIdentifiers: [])
+        let category = UNNotificationCategory(identifier: "dayandreminder", actions: [show], intentIdentifiers: [])
 
         center.setNotificationCategories([category])
         
         if (UserDefaults.standard.object(forKey: "DayandReminderStartTime") == nil) {
             UserDefaults.standard.set(Date(), forKey: "DayandReminderStartTime")
             UserDefaults.standard.set(Date(), forKey: "DayandReminderEndTime")
-            statusBar?.togglePopover(sender: StatusBarController.self)
         }
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
-        
+                
         print("Clicked on notification!")
         
         statusBar?.togglePopover(sender: StatusBarController.self)
+        
+        completionHandler()
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
