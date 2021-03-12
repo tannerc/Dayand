@@ -38,7 +38,7 @@ struct SettingsView: View {
                             if(remindersEnabled != UserDefaults.standard.bool(forKey: "DayandRemindersEnabled")) {
                                 changesMade = true
                             }
-                                self.remindersEnabled = value
+                            self.remindersEnabled = value
                     }
                     .toggleStyle(CustomToggle())
                     .frame(width: 31, height: 20)
@@ -85,7 +85,6 @@ struct SettingsView: View {
                     .frame(minWidth: 200, maxWidth: .infinity, minHeight: 30, maxHeight:.infinity)
                     .padding()
                     .padding(.leading, 32)
-    //                .background(Color(.textColor).opacity(0.03))
                     .cornerRadius(9)
                     .allowsHitTesting(remindersEnabled)
                     .opacity(remindersEnabled ? 1.0 : 0.5)
@@ -114,9 +113,7 @@ struct SettingsView: View {
             }
             .padding(20)
             .background(Color(.textColor).opacity(0.02))
-//            .buttonStyle(PlainButtonStyle())
         }
-//        .padding(20)
         .background(Color("backgroundColor"))
     }
     
@@ -151,7 +148,7 @@ struct SettingsView: View {
             
             do {
                 if (moc.hasChanges) {
-                    try self.moc.save()
+                    try moc.save()
                 }
             } catch {
                 // handle the Core Data error
@@ -182,7 +179,9 @@ struct SettingsView: View {
         
         print("4. Closing window")
         
-        NSApplication.shared.keyWindow?.close()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            NSApplication.shared.keyWindow?.close()
+        }
     }
     
     func ScheduleNotifications() {
@@ -224,7 +223,7 @@ struct SettingsView: View {
                 for index in 0...hoursbetween {
                     var randomMinute: Int
                     
-                    // Generate the hour
+                    // Generate the hour, twice so user gets at least two notifications every hour
                     
                     for _ in 1...2 {
                         randomMinute = Int.random(in: 1..<59)
@@ -253,7 +252,7 @@ struct SettingsView: View {
                     }
                 }
             } else {
-//                Alert(title: Text("Notifications not enabled"), message: Text("Dayand does not have permission to enable notifications. Please check your system settings to continue."), dismissButton: .default(Text("Ok")))
+                Alert(title: Text("Notifications not enabled"), message: Text("Dayand does not have permission to enable notifications. Please check your system settings to continue."), dismissButton: .default(Text("Ok")))
                 remindersEnabled = false
             }
         }
@@ -268,7 +267,6 @@ struct SettingsView: View {
             UserDefaults.standard.set(reminderStart, forKey: "DayandReminderStartTime")
             UserDefaults.standard.set(reminderEnd, forKey: "DayandReminderEndTime")
             ScheduleNotifications()
-//            UserDefaults.standard.set(cadenceTime, forKey: "DayandReminderCadenceTime")
         }
         
         UserDefaults.standard.set(reminderCadence, forKey: "DayandReminderCadence")

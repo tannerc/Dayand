@@ -48,6 +48,7 @@ struct ChartUIView: View {
                         ChartColumn(columnHeight: self.chartdata[key] ?? 0, columnKey: key, columnRoundness: chartdata.count)
                             .onTapGesture {
                                 scrollTarget = (chartdata.count-1) - (Array(chartdata.keys.sorted(by: <)).firstIndex(of: key) ?? 0)
+                                print("Would jump to target row: \(String(describing: scrollTarget))")
                             }
                     }
                 }
@@ -55,7 +56,7 @@ struct ChartUIView: View {
             .frame(maxWidth: .infinity, maxHeight: 240)
             .padding()
             .padding(.bottom, -30)
-            .background(Color(.textColor).opacity(0.05))
+            .background(Color(.textColor).opacity(0.04))
             .cornerRadius(9)
         }
         .padding(.horizontal, 20)
@@ -81,7 +82,6 @@ struct ChartUIView: View {
                 Spacer()
                 
                 Rectangle()
-//                    .fill(VariableHeightColor(forHeight: Int32(columnHeight)))
                     .fill(LinearGradient(
                           gradient: .init(colors: [Color(red: 33 / 255, green: 166 / 255, blue: 210 / 255),
                                                    Color(red: 47 / 255, green: 124 / 255, blue: 246 / 255)]),
@@ -94,56 +94,42 @@ struct ChartUIView: View {
                            maxHeight: CGFloat(columnHeight) * 50 + 1)
                     .padding(EdgeInsets(top: 0, leading: 0, bottom: CGFloat(3), trailing: 0))
                     .clipShape(RoundedRectangle(cornerRadius: CGFloat(columnRoundness), style: .continuous))
-                
-//                    Text("\(FormatDate(whichdate: columnKey))")
-//                        .font(.footnote)
-//                        .truncationMode(.tail)
             }
             .background(Color(.systemGray).opacity(hovered ? 0.2 : 0))
             .onHover {_ in self.hovered.toggle() }
         }
         
-        func VariableHeightColor(forHeight: Int32) -> Color {
-            var returnColor: Color
-            returnColor = Color.green
-            
-            switch forHeight {
-                case 0:
-                    returnColor = Color(.systemGray)
-
-                case 1:
-                    returnColor = Color("blue5")
-
-                case 2:
-                    returnColor = Color("blue4")
-                    
-                case 3:
-                    returnColor = Color("blue3")
-                    
-                case 4:
-                    returnColor = Color("blue2")
-                    
-                case 5:
-                    returnColor = Color(.systemBlue)
-
-                default:
-                    returnColor = Color(.systemGray)
-            }
-            
-            return returnColor
-        }
-        
-        func FormatDate(whichdate: String) -> String {
-            let dateString = String(whichdate)
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyyMMdd"
-            dateFormatter.locale = Locale.init(identifier: "en_US")
-            
-            let dateObj = dateFormatter.date(from: dateString)
-            dateFormatter.dateStyle = .short
-            dateFormatter.timeStyle = .none
-            let returnstring = dateFormatter.string(from: dateObj!)
-            return returnstring
-        }
+//        func VariableHeightColor(forHeight: Int32) -> Color {
+//
+//            // Not used function that previously would change the color of the bar in the chart depending on the response color (or average responses for a single day). Went with a solid color for the final product, but leaving this in for customization.
+//
+//            var returnColor: Color
+//            returnColor = Color.green
+//
+//            switch forHeight {
+//                case 0:
+//                    returnColor = Color(.systemGray)
+//
+//                case 1:
+//                    returnColor = Color(.red)
+//
+//                case 2:
+//                    returnColor = Color(.yellow)
+//
+//                case 3:
+//                    returnColor = Color(.blue)
+//
+//                case 4:
+//                    returnColor = Color(.systemTeal)
+//
+//                case 5:
+//                    returnColor = Color(.green)
+//
+//                default:
+//                    returnColor = Color(.systemGray)
+//            }
+//
+//            return returnColor
+//        }
     }
 }

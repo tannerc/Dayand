@@ -42,7 +42,7 @@ struct ContentView: View {
             return formatter
         }()
     
-    // This is the response dictionary, it can be customized to have fewer or more items, each should map to an int value for analytics.
+    // This is the response array, it can be customized to have fewer or more items, though maximum of five works best for the UI.
     
     let responseArr = ["😡", "☹️", "😐", "🙂", "😄"]
     
@@ -51,11 +51,11 @@ struct ContentView: View {
         ZStack {
             VStack(alignment: .center, spacing: 0) {
                 
-                // Top header of the window pane, for today's date and app menu entry point.
+                // Top header of the window pane, for today's date and app menu entry point
                 
                 HStack(alignment: .center) {
                     
-                    // Display today's date. Feels redundant since this is a status bar app and the date is often displayed?
+                    // Display today's date. Feels redundant since this is a status bar app and the date is often displayed, but using anyway
                     
                     Text(ContentView.entryDateFormat.string(from: Date()) + " · " + GetTodaysEntries())
                         .font(.callout)
@@ -90,6 +90,14 @@ struct ContentView: View {
                             openURL(URL(string: "https://github.com/tannerc/Dayand")!)
                         }) {
                             Text("About Dayand \(GetBuildVersion())")
+                        }
+                        
+                        // Button for supporting Tanner, the creator
+                        
+                        Button(action: {
+                            openURL(URL(string: "https://ko-fi.com/tannerc")!)
+                        }) {
+                            Text("Support the creator")
                         }
                         
                         // Button for quitting the app
@@ -169,7 +177,7 @@ struct ContentView: View {
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
                 .background(Color(.textColor).opacity(0.4))
-                .animation(.easeInOut(duration: 1))
+                .animation(.easeInOut(duration: 0.5))
                 .scaleEffect()
             }
         }
@@ -218,7 +226,7 @@ struct ContentView: View {
         
         print("Would log \(entryString) with response \(response) for \(loggedTime)")
         
-        let entry = Dataobject(context: self.moc)
+        let entry = Dataobject(context: moc)
         entry.id = UUID()
         entry.date = Int32(logDate) ?? 0
         entry.time = Int32(logTime) ?? 0
@@ -226,26 +234,26 @@ struct ContentView: View {
         entry.response = Int32(response)
         entry.activity = entryString
         
-        if (moc.hasChanges) {
-            do {
-                try self.moc.save()
-            } catch {
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+        print("HERE: \(moc.userInfo)")
+        
+        do {
+            if (moc.hasChanges) {
+                try moc.save()
             }
+        } catch {
+            let nserror = error as NSError
+            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
         }
         
         // Animate everything out, but do it carefully for reasons
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             NSApplication.shared.keyWindow?.close()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                 entrySubmitted = false
                 entryString = ""
             }
         }
-        
-        print(entries)
     }
     
     // Get build version of the app to display in the settings menu
@@ -283,7 +291,7 @@ struct ContentView: View {
 
     func DisplayActivityWindow() {
         let contentView = ActivityView().environment(\.managedObjectContext, moc)
-            .frame(minWidth: 700, minHeight: 625)
+            .frame(minWidth: 800, minHeight: 545)
 
         // Create the window and set the content view.
         
@@ -294,7 +302,7 @@ struct ContentView: View {
         activityWindow.backgroundColor = NSColor(Color("backgroundColor"))
         activityWindow.contentView = NSHostingView(rootView: contentView)
         activityWindow.makeKeyAndOrderFront(activityWindow.self)
-        activityWindow.minSize = NSSize(width: 700, height: 625)
+        activityWindow.minSize = NSSize(width: 800, height: 545)
         NSApp.activate(ignoringOtherApps: true)
         activityWindow.isReleasedWhenClosed = false
         

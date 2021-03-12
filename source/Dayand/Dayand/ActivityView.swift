@@ -157,7 +157,7 @@ struct ActivityView: View {
                 }
                 .padding()
                 .frame(maxWidth: .infinity, maxHeight: 30)
-                .background(Color("backgroundColor"))
+                .background(Color(.textColor).opacity(0.02))
                 
                 Divider().background((Color(.lightGray)).opacity(0.02))
                 
@@ -170,7 +170,8 @@ struct ActivityView: View {
                                 TableRow(withDate: loggedentry.logdate, withResponse: loggedentry.response, withActivity: loggedentry.activity ?? "No activity", theObject: loggedentry)
                                 Divider().background((Color(.lightGray)).opacity(0.02))
                             }
-                        }.onChange(of: scrollTarget) { target in
+                        }
+                        .onChange(of: scrollTarget) { target in
                                                         
                             // Detects if scrollTarget variable has been changed from the ChartUIView
                             // If scrollTarget has been changed, scrolls to the appropriate location within the ScrollViewReader
@@ -265,14 +266,9 @@ struct ActivityView: View {
             }
                                     
         } else {
-            
-            print("Charting \(sortedArrayKeys)")
-            
             for index in 0...(daysToChart) {
                 if (lastndays.count > index) {
                     if(sortedArrayKeys.contains(String(lastndays[index].date))){
-                        
-                        print("Checking \(lastndays[index].date)")
                         
                         // Logged day is within the time range to chart
                         // Get the response and set it as an average...
@@ -373,18 +369,18 @@ struct TableRow: View {
             
             Text(responseArr[Int(withResponse-1)])
                 .multilineTextAlignment(.center)
-                .frame(minWidth: 90, minHeight: 30, alignment: .center)
+                .frame(minWidth: 80, minHeight: 30, alignment: .center)
             
             Text(withActivity)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             
             MenuButton("") {
-                Button(action: {
-                    removeActivity(activity: theObject)
-                }) {
-                    Text("Edit activity")
-                }
+//                Button(action: {
+//                    updateActivity(activity: theObject)
+//                }) {
+//                    Text("Edit activity")
+//                }
                 
                 Button(action: {
                     removeActivity(activity: theObject)
@@ -396,13 +392,6 @@ struct TableRow: View {
             .menuButtonStyle(BorderlessButtonMenuButtonStyle())
             .frame(width: 32, height: 32, alignment: .center)
             .background(Image("OverflowIconImage").resizable().frame(width: 26, height: 26).foregroundColor(Color(.textColor).opacity(0.8)).padding(8), alignment: .center)
-            .background(Color("backgroundColor"))
-//            .overlay(
-//                RoundedRectangle(cornerRadius: 7)
-//                    .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
-//            )
-//            .cornerRadius(7)
-//            .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
             .opacity(self.hovered ? 1.0 : 0)
             .disabled(self.hovered ? false : true)
             
@@ -445,12 +434,22 @@ struct TableRow: View {
         return returnstring
     }
     
+    // Function for editing an activity object from the Managed Object Context
+    
+    func updateActivity(activity: Dataobject) {
+        
+        // Never got around to actually creating a UI for updating activities, so punting this for a future release
+        
+    }
+    
     // Function for removing an activity object from the Managed Object Context, which we duplicated at the top of this structure
     
     func removeActivity(activity: Dataobject) {
         moc.delete(activity)
         do {
-            try moc.save()
+            if (moc.hasChanges) {
+                try moc.save()
+            }
         } catch {
             // Error occurred
         }
