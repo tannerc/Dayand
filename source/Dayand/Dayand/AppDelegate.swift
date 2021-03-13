@@ -18,6 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     var statusBar: StatusBarController?
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        
         // Create the SwiftUI view that provides the window contents.
         
         let contentView = ContentView().environment(\.managedObjectContext, persistentContainer.viewContext)
@@ -29,25 +30,36 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         
         statusBar = StatusBarController.init(popover)
         
-        // Register for notifications with actions
+        // Create notification classification for the app
         
         let center = UNUserNotificationCenter.current()
         center.delegate = self
 
         let show = UNNotificationAction(identifier: "show", title: "Open Dayand", options: .foreground)
-        let category = UNNotificationCategory(identifier: "dayandreminder", actions: [show], intentIdentifiers: [])
-
+        let category = UNNotificationCategory(identifier: "alarm", actions: [show], intentIdentifiers: [])
         center.setNotificationCategories([category])
         
         if (UserDefaults.standard.object(forKey: "DayandReminderStartTime") == nil) {
             UserDefaults.standard.set(Date(), forKey: "DayandReminderStartTime")
             UserDefaults.standard.set(Date(), forKey: "DayandReminderEndTime")
         }
+        
+        // Check if notifications were previously enabled, if so: reschedule them all to keep repeating activity
+        
+        
     }
     
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                didReceive response: UNNotificationResponse,
-                                withCompletionHandler completionHandler: @escaping () -> Void) {
+    func applicationDidBecomeActive(_ notification: Notification) {
+        do {
+            try persistentContainer.viewContext.save()
+        } catch {
+            // Customize this code block to include application-specific recovery steps.
+            let nserror = error as NSError
+            NSApplication.shared.presentError(nserror)
+        }
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
                 
         print("Clicked on notification!")
         
@@ -57,7 +69,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
+        
+        // Because the app is closing, we should cancel all notifications (if scheduled) so ghost notifs don't appear for the user
+        
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
     
     // MARK: - Core Data stack
@@ -90,24 +105,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }()
 
     // MARK: - Core Data Saving and Undo support
-
-    @IBAction func saveAction(_ sender: AnyObject?) {
-        // Performs the save action for the application, which is to send the save: message to the application's managed object context. Any encountered errors are presented to the user.
-        let context = persistentContainer.viewContext
-
-        if !context.commitEditing() {
-            NSLog("\(NSStringFromClass(type(of: self))) unable to commit editing before saving")
-        }
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                // Customize this code block to include application-specific recovery steps.
-                let nserror = error as NSError
-                NSApplication.shared.presentError(nserror)
-            }
-        }
-    }
 
     func windowWillReturnUndoManager(window: NSWindow) -> UndoManager? {
         // Returns the NSUndoManager for the application. In this case, the manager returned is that of the managed object context for the application.
@@ -153,7 +150,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 return .terminateCancel
             }
         }
+        
         // If we got here, it is time to quit.
+        
         return .terminateNow
     }
 }

@@ -12,6 +12,7 @@ import UserNotifications
 
 struct SettingsView: View {
     @Environment(\.managedObjectContext) var moc
+    @Environment(\.openURL) var openURL
     @FetchRequest(entity: Dataobject.entity(), sortDescriptors: []) var entries: FetchedResults<Dataobject>
     
     @State private var changesMade = false
@@ -25,7 +26,6 @@ struct SettingsView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            
             VStack(alignment: .leading) {
                 Text("Settings")
                     .font(.largeTitle)
@@ -146,12 +146,13 @@ struct SettingsView: View {
                 moc.delete(entries[index])
             }
             
-            do {
-                if (moc.hasChanges) {
+            if (moc.hasChanges) {
+                do {
                     try moc.save()
+                } catch {
+                    let nserror = error as NSError
+                    fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
                 }
-            } catch {
-                // handle the Core Data error
             }
         } else {
             print("1. Nothing to do")
@@ -184,77 +185,135 @@ struct SettingsView: View {
         }
     }
     
-    func ScheduleNotifications() {
+    func CheckNotificationPermissions() {
         let center = UNUserNotificationCenter.current()
         
         print("Attempting to schedule notifs...")
         
-        center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
-            if granted {
-                remindersEnabled = true
+        center.getNotificationSettings(completionHandler: { (settings) in
+            if settings.authorizationStatus == .notDetermined {
                 
-                // Create the content for notifications
+                print("Requesting permissions...")
                 
-                let content = UNMutableNotificationContent()
-                content.title = "Time to log activity"
-                content.body = "Use Dayand to log what you're doing now and your reaction to it."
-                content.categoryIdentifier = "dayandreminder"
-                content.sound = UNNotificationSound.default
+                // Need to get permission for notifications
                 
-                // Scheduling random minutes between the times set by reminderStart and reminderEnd
-                                
-                let startComponents = Calendar.current.dateComponents([.hour, .minute], from: reminderStart)
-                let startMinute = startComponents.minute ?? 30
-                
-                let endComponents = Calendar.current.dateComponents([.hour, .minute], from: reminderEnd)
-                var endMinute = endComponents.minute ?? 30
-                
-                if (endMinute == 1){
-                    endMinute = 2
-                }
-                
-                let hoursdiff = Calendar.current.dateComponents([.hour], from: startComponents, to: endComponents)
-                var hoursbetween = Int(hoursdiff.hour ?? 1)
-                
-                if (hoursbetween < 0) {
-                    hoursbetween *= -1
-                }
-                                
-                for index in 0...hoursbetween {
-                    var randomMinute: Int
-                    
-                    // Generate the hour, twice so user gets at least two notifications every hour
-                    
-                    for _ in 1...2 {
-                        randomMinute = Int.random(in: 1..<59)
-                        
-                        if index == 0 {
-                            randomMinute = startMinute
-                        }
-                        
-                        let tempInt = index * (60 * 60)
-                        let tempComponents = Calendar.current.dateComponents([.hour], from: reminderStart.addingTimeInterval(TimeInterval(tempInt)))
-
-                        var dateComponents = DateComponents()
-                        dateComponents.hour = tempComponents.hour
-                        dateComponents.minute = randomMinute
-                                            
-                        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
-                        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-                        center.add(request)
+                center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
+                    if granted {
+                        remindersEnabled = true
+                        ScheduleNotifications()
                     }
                 }
                 
-                center.getPendingNotificationRequests { (notifications) in
-                    print("Count: \(notifications.count)")
-                    for item in notifications {
-                      print(item.content)
+            } else if settings.authorizationStatus == .denied {
+                
+                print("Notification permission not authorized")
+                
+                // Notifications not currently authorized, display a prompt for the user
+                
+                DispatchQueue.main.async {
+                    let question = "Could not save changes while quitting. Quit anyway?"
+                    let info = "Allow Dayand to send "
+                    let primaryButton = "Open Preferences"
+                    let cancelButton = "Cancel"
+                    
+                    let alert = NSAlert()
+                    alert.messageText = question
+                    alert.informativeText = info
+                    alert.addButton(withTitle: primaryButton)
+                    alert.addButton(withTitle: cancelButton)
+                    
+                    let answer = alert.runModal()
+                    if answer == .alertFirstButtonReturn {
+                        openURL(URL(string: "x-apple.systempreferences:com.apple.preference.notifications")!)
+                    } else {
+                        remindersEnabled = false
                     }
                 }
-            } else {
-//                Alert(title: Text("Notifications not enabled"), message: Text("Dayand does not have permission to enable notifications. Please check your system settings to continue."), dismissButton: .default(Text("Ok")))
-                remindersEnabled = false
+                
+            } else if settings.authorizationStatus == .authorized {
+                
+                // Already authorized, set the notifications!
+                
+                print("Authorized and setting notifications!")
+                ScheduleNotifications()
             }
+        })
+    }
+    
+    func ScheduleNotifications() {
+        let center = UNUserNotificationCenter.current()
+        
+        remindersEnabled = true
+        
+        // Clear any existing notifications
+        
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        
+        // Create the content for notifications
+        
+        let content = UNMutableNotificationContent()
+        content.title = "Time to log activity"
+        content.body = "Use Dayand to log what you're doing now and your reaction to it."
+        content.categoryIdentifier = "alarm"
+        content.sound = UNNotificationSound.default
+        
+        // Scheduling random minutes between the times set by reminderStart and reminderEnd
+                        
+        let startComponents = Calendar.current.dateComponents([.hour, .minute], from: reminderStart)
+        let startMinute = startComponents.minute ?? 30
+        
+        let endComponents = Calendar.current.dateComponents([.hour, .minute], from: reminderEnd)
+        var endMinute = endComponents.minute ?? 30
+        
+        if (endMinute == 1){
+            endMinute = 2
+        }
+        
+        let hoursdiff = Calendar.current.dateComponents([.hour], from: startComponents, to: endComponents)
+        var hoursbetween = Int(hoursdiff.hour ?? 1)
+        
+        if (hoursbetween < 0) {
+            hoursbetween *= -1
+        }
+                        
+        for index in 0...hoursbetween {
+            var randomMinute: Int
+            var prevMinute: Int = 0
+            
+            // Generate the hour, twice so user gets at least two notifications every hour
+            
+            for _ in 1...2 {
+                randomMinute = Int.random(in: 1..<59)
+                
+                if index == 0 {
+                    randomMinute = startMinute
+                }
+                
+                if (randomMinute == prevMinute || randomMinute == prevMinute+10) {
+                    randomMinute = Int.random(in: 1..<59)
+                }
+                
+                prevMinute = randomMinute
+                
+                let tempInt = index * (60 * 60)
+                let tempComponents = Calendar.current.dateComponents([.hour], from: reminderStart.addingTimeInterval(TimeInterval(tempInt)))
+
+                var dateComponents = DateComponents()
+                dateComponents.hour = tempComponents.hour
+                dateComponents.minute = randomMinute
+                                    
+                let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
+                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+                center.add(request)
+            }
+        }
+        
+        center.getPendingNotificationRequests { (notifications) in
+            print("Count: \(notifications.count)")
+        }
+        
+        DispatchQueue.main.async {
+            NSApplication.shared.keyWindow?.close()
         }
     }
     
@@ -266,11 +325,14 @@ struct SettingsView: View {
         } else {
             UserDefaults.standard.set(reminderStart, forKey: "DayandReminderStartTime")
             UserDefaults.standard.set(reminderEnd, forKey: "DayandReminderEndTime")
-            ScheduleNotifications()
+            CheckNotificationPermissions()
         }
         
         UserDefaults.standard.set(reminderCadence, forKey: "DayandReminderCadence")
-        NSApplication.shared.keyWindow?.close()
+        
+        DispatchQueue.main.async {
+            NSApplication.shared.keyWindow?.close()
+        }
     }
 }
 

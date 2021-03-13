@@ -78,28 +78,28 @@ struct ActivityView: View {
                         })
                         
                         Button(action: {ChangeChartRange(to: 7)}, label: {
-                            Text("7 days")
+                            Text("Last 7 days")
                         })
 
                         Button(action: {ChangeChartRange(to: 14)}, label: {
-                            Text("14 days")
+                            Text("Last 14 days")
                         })
 
                         Button(action: {ChangeChartRange(to: 31)}, label: {
-                            Text("31 days")
+                            Text("Last 31 days")
                         })
                         
                         Button(action: {ChangeChartRange(to: 48)}, label: {
-                            Text("48 days")
+                            Text("Last 48 days")
                         })
                         
                         Button(action: {ChangeChartRange(to: 90)}, label: {
-                            Text("90 days")
+                            Text("Last 90 days")
                         })
                     }
                     .contentShape(Rectangle())
                     .menuButtonStyle(BorderlessButtonMenuButtonStyle())
-                    .frame(width: 122, height: 38, alignment: .trailing)
+                    .frame(width: 132, height: 38, alignment: .trailing)
                     .background(Image("DownTriangleImage").resizable().frame(width: 24, height: 24).foregroundColor(Color(.textColor)).scaleEffect(0.9).padding(8), alignment: .trailing)
                     .background(Color("backgroundColor"))
                     .overlay(
@@ -109,7 +109,7 @@ struct ActivityView: View {
                     .cornerRadius(7)
                     .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
 
-                    Text(daysToChart == 1 ? "Today" : "\(daysToChart) Days")
+                    Text(daysToChart == 1 ? "Today" : "Last \(daysToChart) Days")
                         .font(.headline)
                         .fontWeight(.medium)
                         .multilineTextAlignment(.center)
@@ -123,7 +123,7 @@ struct ActivityView: View {
                     .padding(.trailing, 20)
                     .disabled(entries.count > 0 ? false : true)
             }
-            .padding(.bottom, 12)
+            .padding(.bottom, 4)
             .padding(.top, -12)
                 
             // Chart view
@@ -156,10 +156,10 @@ struct ActivityView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 }
                 .padding()
-                .frame(maxWidth: .infinity, maxHeight: 30)
-                .background(Color(.textColor).opacity(0.02))
+                .frame(maxWidth: .infinity, maxHeight: 40)
+//                .background(Color(.textColor).opacity(0.02))
                 
-                Divider().background((Color(.lightGray)).opacity(0.02))
+//                Divider().background((Color(.lightGray)).opacity(0.02))
                 
                 // Now all the data in a table-like format
                 
@@ -189,6 +189,10 @@ struct ActivityView: View {
                         }
                     }
                 }
+//                .overlay(
+//                    RoundedRectangle(cornerRadius: 7)
+//                        .stroke(Color(.systemGray).opacity(0.5), lineWidth: 1)
+//                )
             }
             .overlay(
                 RoundedRectangle(cornerRadius: 7)
@@ -259,13 +263,12 @@ struct ActivityView: View {
         if (daysToChart == 1) {
             
             // Charting today only
-                        
+                                    
             for indexnew in 0...(lastndays.count-1) {
                 if(sortedArrayKeys.contains(String(lastndays[indexnew].date))){
                     lastNEntriesArray[String("\([lastndays.count-indexnew])")] = Int32(lastndays[indexnew].response)
                 }
             }
-                                    
         } else {
             for index in 0...(daysToChart) {
                 if (lastndays.count > index) {
@@ -447,12 +450,13 @@ struct TableRow: View {
     
     func removeActivity(activity: Dataobject) {
         moc.delete(activity)
-        do {
-            if (moc.hasChanges) {
+        if (moc.hasChanges) {
+            do {
                 try moc.save()
+            } catch {
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
             }
-        } catch {
-            // Error occurred
         }
     }
 }

@@ -47,7 +47,6 @@ struct ContentView: View {
     let responseArr = ["😡", "☹️", "😐", "🙂", "😄"]
     
     var body: some View {
-        
         ZStack {
             VStack(alignment: .center, spacing: 0) {
                 
@@ -107,10 +106,11 @@ struct ContentView: View {
                         }) {
                             Text("Quit")
                         }
-                    }.background(Image("SettingsImage").resizable().frame(width: 24, height: 24, alignment: .center).foregroundColor(Color(.textColor)))
-                        .frame(width: 24, height: 24, alignment: .trailing)
-                        .padding(4)
-                        .menuButtonStyle(BorderlessButtonMenuButtonStyle())
+                    }
+                    .background(Image("SettingsImage").resizable().frame(width: 24, height: 24, alignment: .center).foregroundColor(Color(.textColor)))
+                    .frame(width: 24, height: 24, alignment: .trailing)
+                    .padding(4)
+                    .menuButtonStyle(BorderlessButtonMenuButtonStyle())
                 }
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
@@ -232,17 +232,8 @@ struct ContentView: View {
         entry.time = Int32(logTime) ?? 0
         entry.logdate = Int64(loggedTime) ?? 0
         entry.response = Int32(response)
-        entry.activity = entryString
-        
-        print("HERE: \(moc.userInfo)")
-        
-        do {
-            if (moc.hasChanges) {
-                try moc.save()
-            }
-        } catch {
-            let nserror = error as NSError
-            fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+        if entryString.count > 0 {
+            entry.activity = entryString
         }
         
         // Animate everything out, but do it carefully for reasons
@@ -266,9 +257,26 @@ struct ContentView: View {
         }
     }
     
+    func SaveState() {
+        if moc.hasChanges {
+            moc.processPendingChanges()
+            
+            do {
+                try moc.save()
+            } catch {
+                // Customize this code block to include application-specific recovery steps.
+                let nserror = error as NSError
+                NSApplication.shared.presentError(nserror)
+            }
+        }
+    }
+    
     // Open settings view in a new window object
 
     func DisplaySettingsWindow() {
+        
+        SaveState()
+        
         let contentView = SettingsView().environment(\.managedObjectContext, moc)
 
         // Create the window and set the content view.
@@ -290,6 +298,9 @@ struct ContentView: View {
     // Open activity view in a new window object
 
     func DisplayActivityWindow() {
+        
+        SaveState()
+        
         let contentView = ActivityView().environment(\.managedObjectContext, moc)
             .frame(minWidth: 800, minHeight: 545)
 

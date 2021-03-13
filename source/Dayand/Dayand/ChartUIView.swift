@@ -44,14 +44,14 @@ struct ChartUIView: View {
                 }
                 
                 HStack {
-                    ForEach(chartdata.keys.sorted(), id: \.self) { key in
+                    ForEach(chartdata.keys.sorted(by: {$0.count < $1.count || $0.count == $1.count && $0 < $1}), id: \.self) { key in
                         ChartColumn(columnHeight: self.chartdata[key] ?? 0, columnKey: key, columnRoundness: chartdata.count)
                             .onTapGesture {
                                 scrollTarget = (chartdata.count-1) - (Array(chartdata.keys.sorted(by: <)).firstIndex(of: key) ?? 0)
-                                print("Would jump to target row: \(String(describing: scrollTarget))")
                             }
                     }
                 }
+                .padding(.leading, 40)
             }
             .frame(maxWidth: .infinity, maxHeight: 240)
             .padding()
@@ -83,20 +83,21 @@ struct ChartUIView: View {
                 
                 Rectangle()
                     .fill(LinearGradient(
-                          gradient: .init(colors: [Color(red: 33 / 255, green: 166 / 255, blue: 210 / 255),
-                                                   Color(red: 47 / 255, green: 124 / 255, blue: 246 / 255)]),
+                          gradient: .init(colors: [Color(red: 31 / 255, green: 174 / 255, blue: 203 / 255),
+                                                   Color(red: 28 / 255, green: 74 / 255, blue: 147 / 255)]),
                           startPoint: .init(x: 0.5, y: 0),
-                          endPoint: .init(x: 0.5, y: 0.6)
+                          endPoint: .init(x: 0.5, y: 0.9)
                         ))
                     .frame(minWidth: 1,
                            maxWidth: .infinity,
                            minHeight: 1,
-                           maxHeight: CGFloat(columnHeight) * 50 + 1)
+                           maxHeight: CGFloat((columnHeight) * 40) + 15)
                     .padding(EdgeInsets(top: 0, leading: 0, bottom: CGFloat(3), trailing: 0))
                     .clipShape(RoundedRectangle(cornerRadius: CGFloat(columnRoundness), style: .continuous))
+                    .opacity(columnHeight > 1 ? 1.0 : 0.2)
             }
-            .background(Color(.systemGray).opacity(hovered ? 0.2 : 0))
-            .onHover {_ in self.hovered.toggle() }
+            .background(columnHeight > 15 ? Color(.systemGray).opacity(hovered ? 0.2 : 0) : Color.clear)
+            .onHover { _ in self.hovered.toggle() }
         }
         
 //        func VariableHeightColor(forHeight: Int32) -> Color {
