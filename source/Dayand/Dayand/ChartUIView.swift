@@ -34,10 +34,6 @@ struct ChartUIView: View {
                             .background(Color(.systemGray).opacity(0.05))
                             .padding(8)
                             .padding(.leading, 20)
-                        Rectangle()
-                            .strokeBorder(Color(.systemBlue).opacity(0.3), style: StrokeStyle(lineWidth: 1, dash: [12]))
-                            .frame(maxWidth: .infinity, maxHeight: 1)
-                            .opacity(i == GetMedian() ? 1.0 : 0)
                         
                         Spacer()
                     }
@@ -94,7 +90,7 @@ struct ChartUIView: View {
                            maxHeight: CGFloat((columnHeight) * 40) + 15)
                     .padding(EdgeInsets(top: 0, leading: 0, bottom: CGFloat(3), trailing: 0))
                     .clipShape(RoundedRectangle(cornerRadius: CGFloat(columnRoundness), style: .continuous))
-                    .opacity(columnHeight > 1 ? 1.0 : 0.2)
+                    .opacity(columnHeight > 1 ? 1.0 : 0.9)
             }
             .background(columnHeight > 15 ? Color(.systemGray).opacity(hovered ? 0.2 : 0) : Color.clear)
             .onHover { _ in self.hovered.toggle() }

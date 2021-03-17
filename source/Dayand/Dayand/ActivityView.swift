@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 import CoreData
-import UserNotifications
 
 struct ActivityView: View {
     
@@ -109,7 +108,7 @@ struct ActivityView: View {
                     .cornerRadius(7)
                     .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
 
-                    Text(daysToChart == 1 ? "Today" : "Last \(daysToChart) Days")
+                    Text(daysToChart == 1 ? "Today" : "Last \(daysToChart) days")
                         .font(.headline)
                         .fontWeight(.medium)
                         .multilineTextAlignment(.center)

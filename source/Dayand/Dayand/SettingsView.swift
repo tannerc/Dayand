@@ -12,20 +12,19 @@ import UserNotifications
 
 struct SettingsView: View {
     @Environment(\.managedObjectContext) var moc
-    @Environment(\.openURL) var openURL
     @FetchRequest(entity: Dataobject.entity(), sortDescriptors: []) var entries: FetchedResults<Dataobject>
     
     @State private var changesMade = false
     @State private var showingAlert = false
     
     @State var remindersEnabled = UserDefaults.standard.bool(forKey: "DayandRemindersEnabled")
-    @State var reminderCadence = UserDefaults.standard.string(forKey: "DayandReminderCadence")
+    @State var reminderCadence = UserDefaults.standard.integer(forKey: "DayandReminderCadence")
     @State var reminderStart = UserDefaults.standard.object(forKey: "DayandReminderStartTime") as! Date
     @State var reminderEnd = UserDefaults.standard.object(forKey: "DayandReminderEndTime") as! Date
-    @State var cadenceTime = UserDefaults.standard.string(forKey: "DayandReminderCadenceTime") ?? "30"
     
     var body: some View {
         VStack(alignment: .leading) {
+            
             VStack(alignment: .leading) {
                 Text("Settings")
                     .font(.largeTitle)
@@ -38,7 +37,7 @@ struct SettingsView: View {
                             if(remindersEnabled != UserDefaults.standard.bool(forKey: "DayandRemindersEnabled")) {
                                 changesMade = true
                             }
-                            self.remindersEnabled = value
+                                self.remindersEnabled = value
                     }
                     .toggleStyle(CustomToggle())
                     .frame(width: 31, height: 20)
@@ -58,24 +57,70 @@ struct SettingsView: View {
                 
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 20) {
-                        HStack {
-                            Group {
-                                Text("Between")
+                        HStack(spacing: 0) {
+                            ZStack(alignment: .leading) {
+                                MenuButton("") {
+                                    Button(action: { ChangeReminderCadence(toCadence: 1) }, label: {
+                                        Text("1 reminder")
+                                    })
+                                    
+                                    Button(action: { ChangeReminderCadence(toCadence: 2) }, label: {
+                                        Text("2 reminders")
+                                    })
+                                    
+                                    Button(action: { ChangeReminderCadence(toCadence: 3) }, label: {
+                                        Text("3 reminders")
+                                    })
+                                    
+                                    Button(action: { ChangeReminderCadence(toCadence: 4) }, label: {
+                                        Text("4 reminders")
+                                    })
+                                    
+                                    Button(action: { ChangeReminderCadence(toCadence: 5) }, label: {
+                                        Text("5 reminders")
+                                    })
+                                    
+                                    Button(action: { ChangeReminderCadence(toCadence: 6) }, label: {
+                                        Text("6 reminders")
+                                    })
+                                }
+                                .contentShape(Rectangle())
+                                .menuButtonStyle(BorderlessButtonMenuButtonStyle())
+                                .frame(width: 132, height: 38, alignment: .trailing)
+                                .background(Image("DownTriangleImage").resizable().frame(width: 24, height: 24).foregroundColor(Color(.textColor)).scaleEffect(0.9).padding(8), alignment: .trailing)
+                                .background(Color("backgroundColor"))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 7)
+                                        .stroke(Color(.systemGray).opacity(0.4), lineWidth: 1)
+                                )
+                                .cornerRadius(7)
+                                .shadow(color: Color(.shadowColor).opacity(0.2), radius: 1, x: 0, y: 1)
                                 
-                                DatePicker(selection: $reminderStart, displayedComponents: .hourAndMinute, label: { Text("") })
-                                    .datePickerStyle(FieldDatePickerStyle())
-                                    .frame(width: 90, height: 38)
-                                    .cornerRadius(7)
-                                    .focusable()
-                                
-                                Text("and")
-
-                                DatePicker(selection: $reminderEnd, displayedComponents: .hourAndMinute, label: { Text("") })
-                                    .datePickerStyle(FieldDatePickerStyle())
-                                    .frame(width: 90, height: 38)
-                                    .cornerRadius(7)
-                                    .focusable()
+                                Text(reminderCadence == 1 ? "\(reminderCadence) reminder" : "\(reminderCadence) reminders")
+                                    .font(.headline)
+                                    .fontWeight(.medium)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.leading, 11.0)
+                                    .allowsHitTesting(false)
                             }
+                            
+                            Text("between")
+                                .padding(.leading, 12)
+                            
+                            DatePicker(selection: $reminderStart, displayedComponents: .hourAndMinute, label: { Text("") })
+                                .datePickerStyle(FieldDatePickerStyle())
+                                .frame(width: 90, height: 38)
+                                .cornerRadius(7)
+                                .focusable()
+                            
+                            Text("and")
+                                .padding(.leading, 8)
+
+                            DatePicker(selection: $reminderEnd, displayedComponents: .hourAndMinute, label: { Text("") })
+                                .datePickerStyle(FieldDatePickerStyle())
+                                .frame(width: 90, height: 38)
+                                .cornerRadius(7)
+                                .focusable()
                             
                             Spacer()
                         }
@@ -85,13 +130,13 @@ struct SettingsView: View {
                     .frame(minWidth: 200, maxWidth: .infinity, minHeight: 30, maxHeight:.infinity)
                     .padding()
                     .padding(.leading, 32)
+    //                .background(Color(.textColor).opacity(0.03))
                     .cornerRadius(9)
                     .allowsHitTesting(remindersEnabled)
                     .opacity(remindersEnabled ? 1.0 : 0.5)
                 }
             }
             .padding(20)
-            
             
             // Footer
             
@@ -113,7 +158,9 @@ struct SettingsView: View {
             }
             .padding(20)
             .background(Color(.textColor).opacity(0.02))
+//            .buttonStyle(PlainButtonStyle())
         }
+//        .padding(20)
         .background(Color("backgroundColor"))
     }
     
@@ -132,6 +179,12 @@ struct SettingsView: View {
             return String("\(String(entries.count)) \(suffixString)")
         }
     }
+        
+    func ChangeReminderCadence(toCadence: Int) {
+        UserDefaults.standard.setValue(toCadence, forKey: "DayandReminderCadence")
+        reminderCadence = toCadence
+        changesMade = true
+    }
     
     func ResetTheApp() {
         
@@ -145,15 +198,7 @@ struct SettingsView: View {
             for index in 0...entries.count-1 {
                 moc.delete(entries[index])
             }
-            
-            if (moc.hasChanges) {
-                do {
-                    try moc.save()
-                } catch {
-                    let nserror = error as NSError
-                    fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-                }
-            }
+            try? self.moc.save()
         } else {
             print("1. Nothing to do")
         }
@@ -168,6 +213,7 @@ struct SettingsView: View {
             UserDefaults.standard.set(Date(), forKey: "DayandReminderStartTime")
             UserDefaults.standard.set(Date(), forKey: "DayandReminderEndTime")
             UserDefaults.standard.set(7, forKey: "DayandChartRange")
+            UserDefaults.standard.set(2, forKey: "DayandReminderCadenceTime")
         }
         
         // Cancel any pending notifications
@@ -180,84 +226,48 @@ struct SettingsView: View {
         
         print("4. Closing window")
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            NSApplication.shared.keyWindow?.close()
-        }
+        NSApplication.shared.keyWindow?.close()
     }
     
     func CheckNotificationPermissions() {
         let center = UNUserNotificationCenter.current()
         
-        print("Attempting to schedule notifs...")
-        
-        center.getNotificationSettings(completionHandler: { (settings) in
-            if settings.authorizationStatus == .notDetermined {
-                
-                print("Requesting permissions...")
-                
-                // Need to get permission for notifications
-                
-                center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
-                    if granted {
-                        remindersEnabled = true
-                        ScheduleNotifications()
-                    }
-                }
-                
-            } else if settings.authorizationStatus == .denied {
-                
-                print("Notification permission not authorized")
-                
-                // Notifications not currently authorized, display a prompt for the user
-                
-                DispatchQueue.main.async {
-                    let question = "Could not save changes while quitting. Quit anyway?"
-                    let info = "Allow Dayand to send "
-                    let primaryButton = "Open Preferences"
-                    let cancelButton = "Cancel"
-                    
-                    let alert = NSAlert()
-                    alert.messageText = question
-                    alert.informativeText = info
-                    alert.addButton(withTitle: primaryButton)
-                    alert.addButton(withTitle: cancelButton)
-                    
-                    let answer = alert.runModal()
-                    if answer == .alertFirstButtonReturn {
-                        openURL(URL(string: "x-apple.systempreferences:com.apple.preference.notifications")!)
-                    } else {
-                        remindersEnabled = false
-                    }
-                }
-                
-            } else if settings.authorizationStatus == .authorized {
-                
-                // Already authorized, set the notifications!
-                
-                print("Authorized and setting notifications!")
+        center.requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
+            if granted {
+                remindersEnabled = true
+                UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
                 ScheduleNotifications()
+            } else {
+//                Alert(title: Text("Notifications not enabled"), message: Text("Dayand does not have permission to enable notifications. Please check your system settings to continue."), dismissButton: .default(Text("Ok")))
+                remindersEnabled = false
             }
-        })
+        }
     }
     
     func ScheduleNotifications() {
         let center = UNUserNotificationCenter.current()
         
-        remindersEnabled = true
+        // Create the content for notifications, using a random string for title and body.
         
-        // Clear any existing notifications
+        let titleArray = ["Log activity",
+                          "What are you doing now?",
+                          "Where is your focus?",
+                          "Capture this moment",
+                          "What's important in this moment?"]
         
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-        
-        // Create the content for notifications
+        let bodyArray = ["Use Dayand to log what you're doing now and your reaction to it.",
+                            "Capture your activity and response now.",
+                            "How are you feeling about what you're doing now?",
+                            "Take one minute to log your activity.",
+                            "Take note of what you're doing and how you feel."]
         
         let content = UNMutableNotificationContent()
-        content.title = "Time to log activity"
-        content.body = "Use Dayand to log what you're doing now and your reaction to it."
+        content.title = titleArray.randomElement() ?? "Log activity"
+        content.body = bodyArray.randomElement() ?? "Use Dayand to log what you're doing now and your reaction to it."
         content.categoryIdentifier = "alarm"
         content.sound = UNNotificationSound.default
         
-        // Scheduling random minutes between the times set by reminderStart and reminderEnd
+        // Scheduling random minutes between the times set by reminderStart and reminderEnd.
                         
         let startComponents = Calendar.current.dateComponents([.hour, .minute], from: reminderStart)
         let startMinute = startComponents.minute ?? 30
@@ -275,45 +285,63 @@ struct SettingsView: View {
         if (hoursbetween < 0) {
             hoursbetween *= -1
         }
+        
+        print("SHOULD SCHEDULE \(hoursbetween*reminderCadence) NOTIFICATIONS BETWEEN \(String(describing: startComponents.hour)):\(String(describing: startComponents.minute)) AND \(String(describing: endComponents.hour)):\(String(describing: endComponents.minute))")
+        
+        // Loop through the hours to generate prompts at the proper cadence
                         
         for index in 0...hoursbetween {
             var randomMinute: Int
-            var prevMinute: Int = 0
+            var prevMinute: Int = 1
             
-            // Generate the hour, twice so user gets at least two notifications every hour
+            // Generate the minute for each hour
             
-            for _ in 1...2 {
+            if reminderCadence < 1 {
+                reminderCadence = 2
+                UserDefaults.standard.setValue(2, forKey: "DayandReminderCadence")
+            }
+            
+            // For each cadence, assign an hour and minute value
+            
+            for _ in 1...reminderCadence {
+                
                 randomMinute = Int.random(in: 1..<59)
                 
-                if index == 0 {
-                    randomMinute = startMinute
+                if (index == 0 && randomMinute < startMinute) {
+                    randomMinute = Int.random(in: 1..<59) + 1
                 }
                 
-                if (randomMinute == prevMinute || randomMinute == prevMinute+10) {
+                if (randomMinute == prevMinute) {
                     randomMinute = Int.random(in: 1..<59)
                 }
                 
-                prevMinute = randomMinute
+                if (index == hoursbetween && randomMinute > endMinute) {
+                    randomMinute = endMinute
+                }
                 
                 let tempInt = index * (60 * 60)
                 let tempComponents = Calendar.current.dateComponents([.hour], from: reminderStart.addingTimeInterval(TimeInterval(tempInt)))
-
+                
                 var dateComponents = DateComponents()
                 dateComponents.hour = tempComponents.hour
                 dateComponents.minute = randomMinute
-                                    
-                let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
-                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+                
+                let diggity = UUID().uuidString
+                
+//                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(5*index2), repeats: true)
+                let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+                let request = UNNotificationRequest(identifier: diggity, content: content, trigger: trigger)
                 center.add(request)
+                
+                prevMinute = randomMinute
             }
         }
         
         center.getPendingNotificationRequests { (notifications) in
             print("Count: \(notifications.count)")
-        }
-        
-        DispatchQueue.main.async {
-            NSApplication.shared.keyWindow?.close()
+//            for item in notifications {
+//              print(item.content)
+//            }
         }
     }
     
@@ -325,14 +353,12 @@ struct SettingsView: View {
         } else {
             UserDefaults.standard.set(reminderStart, forKey: "DayandReminderStartTime")
             UserDefaults.standard.set(reminderEnd, forKey: "DayandReminderEndTime")
+            UserDefaults.standard.set(reminderCadence, forKey: "DayandReminderCadenceTime")
             CheckNotificationPermissions()
         }
         
         UserDefaults.standard.set(reminderCadence, forKey: "DayandReminderCadence")
-        
-        DispatchQueue.main.async {
-            NSApplication.shared.keyWindow?.close()
-        }
+        NSApplication.shared.keyWindow?.close()
     }
 }
 

@@ -11,7 +11,6 @@
 		4304FF5925C39D4700C46EDB /* ChartUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4304FF5825C39D4700C46EDB /* ChartUIView.swift */; };
 		435801C625E1DA350036CF5B /* CustomToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435801C525E1DA350036CF5B /* CustomToggle.swift */; };
 		43637C3825BDEE8E00FC674C /* Dayand.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 43637C3625BDEE8E00FC674C /* Dayand.xcdatamodeld */; };
-		4365674C25FC0238009A3851 /* NotificationsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4365674B25FC0238009A3851 /* NotificationsManager.swift */; };
 		436BC6AE25D8916D00594A7C /* CustomButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436BC6AD25D8916D00594A7C /* CustomButtonView.swift */; };
 		4390A27125BCAE6400654115 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4390A27025BCAE6400654115 /* AppDelegate.swift */; };
 		4390A27325BCAE6400654115 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4390A27225BCAE6400654115 /* ContentView.swift */; };
@@ -30,7 +29,6 @@
 		4304FF5825C39D4700C46EDB /* ChartUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartUIView.swift; sourceTree = "<group>"; };
 		435801C525E1DA350036CF5B /* CustomToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomToggle.swift; sourceTree = "<group>"; };
 		43637C3725BDEE8E00FC674C /* Dayand.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Dayand.xcdatamodel; sourceTree = "<group>"; };
-		4365674B25FC0238009A3851 /* NotificationsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsManager.swift; sourceTree = "<group>"; };
 		436BC6AD25D8916D00594A7C /* CustomButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomButtonView.swift; sourceTree = "<group>"; };
 		4390A26D25BCAE6400654115 /* Dayand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dayand.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4390A27025BCAE6400654115 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -94,7 +92,6 @@
 				4390A27C25BCAE6400654115 /* Info.plist */,
 				4390A27D25BCAE6400654115 /* Dayand.entitlements */,
 				4390A27625BCAE6400654115 /* Preview Content */,
-				4365674B25FC0238009A3851 /* NotificationsManager.swift */,
 			);
 			path = Dayand;
 			sourceTree = "<group>";
@@ -187,7 +184,6 @@
 				43637C3825BDEE8E00FC674C /* Dayand.xcdatamodeld in Sources */,
 				4304FF4025BFAB1400C46EDB /* ActivityView.swift in Sources */,
 				4390A29825BCB53100654115 /* LogViewController.swift in Sources */,
-				4365674C25FC0238009A3851 /* NotificationsManager.swift in Sources */,
 				4390A27125BCAE6400654115 /* AppDelegate.swift in Sources */,
 				4390A29325BCB31E00654115 /* MainViewController.swift in Sources */,
 			);

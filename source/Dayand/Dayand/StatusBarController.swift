@@ -7,6 +7,7 @@
 
 import Foundation
 import AppKit
+import UserNotifications
 
 class StatusBarController {
     private var statusBar: NSStatusBar
@@ -20,7 +21,7 @@ class StatusBarController {
         
         // Creating a status bar item having a fixed length
         
-        statusItem = statusBar.statusItem(withLength: 20.0)
+        statusItem = statusBar.statusItem(withLength: 32.0)
         
         if let statusBarButton = statusItem.button {
             statusBarButton.image = #imageLiteral(resourceName: "icon")
@@ -43,6 +44,11 @@ class StatusBarController {
     }
     
     func showPopover(_ sender: AnyObject) {
+        let center = UNUserNotificationCenter.current()
+        center.getPendingNotificationRequests { (notifications) in
+            print("Count: \(notifications.count)")
+        }
+        
         if let statusBarButton = statusItem.button {
             
             // Create the popover position

@@ -24,7 +24,7 @@ struct CustomButtonView: View {
                         .fontWeight(.medium)
                         .multilineTextAlignment(.center)
                         .padding(.vertical, 11.0)
-                        .padding(.horizontal, 24.0)
+                        .padding(.horizontal, 20.0)
                         .foregroundColor(Color("backgroundColor"))
                         .background(Color(.systemBlue))
                         .cornerRadius(buttonRadius)
@@ -44,7 +44,7 @@ struct CustomButtonView: View {
                         .fontWeight(.medium)
                         .multilineTextAlignment(.center)
                         .padding(.vertical, 11.0)
-                        .padding(.horizontal, 24.0)
+                        .padding(.horizontal, 20.0)
                         .foregroundColor(Color(.red))
                         .background(Color("backgroundColor"))
                         .overlay(
@@ -68,7 +68,7 @@ struct CustomButtonView: View {
                         .fontWeight(.medium)
                         .multilineTextAlignment(.center)
                         .padding(.vertical, 11.0)
-                        .padding(.horizontal, 24.0)
+                        .padding(.horizontal, 20.0)
                         .foregroundColor(Color(.textColor))
                         .background(Color("backgroundColor"))
                         .overlay(

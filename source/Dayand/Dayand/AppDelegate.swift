@@ -42,14 +42,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         if (UserDefaults.standard.object(forKey: "DayandReminderStartTime") == nil) {
             UserDefaults.standard.set(Date(), forKey: "DayandReminderStartTime")
             UserDefaults.standard.set(Date(), forKey: "DayandReminderEndTime")
+            UserDefaults.standard.set(2, forKey: "DayandReminderCadenceTime")
         }
-        
-        // Check if notifications were previously enabled, if so: reschedule them all to keep repeating activity
-        
-        
     }
     
-    func applicationDidBecomeActive(_ notification: Notification) {
+    func applicationDidBecomeActive(_ notification: Notification) {        
         do {
             try persistentContainer.viewContext.save()
         } catch {
@@ -72,7 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         
         // Because the app is closing, we should cancel all notifications (if scheduled) so ghost notifs don't appear for the user
         
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+//        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
     }
     
     // MARK: - Core Data stack
