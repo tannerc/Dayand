@@ -243,86 +243,67 @@ struct ActivityView: View {
         
         var lastNEntriesArray = [String: Int32]()
         
-        for _ in 0...300 {
-            let day = arc4random_uniform(UInt32(91))+1
-            let hour = arc4random_uniform(23)
-            let minute = arc4random_uniform(59)
-
-            let today = Date(timeIntervalSinceNow: 0)
-            let gregorian  = NSCalendar(calendarIdentifier: NSCalendar.Identifier.gregorian)
-            var offsetComponents = DateComponents()
-            offsetComponents.day = -1 * Int(day - 1)
-            offsetComponents.hour = -1 * Int(hour)
-            offsetComponents.minute = -1 * Int(minute)
-
-            let randomDate = gregorian?.date(byAdding: offsetComponents, to: today, options: .init(rawValue: 0) ) ?? Date()
-            let toDate = dateFormatter.string(from: randomDate)
-            print("Date is \(randomDate)")
-
-            lastNEntriesArray[String(toDate)] = Int32(Int(Int.random(in: 1..<6)))
+        if daysToChart < 1 {
+            daysToChart = 7
         }
-        
-//        if daysToChart < 1 {
-//            daysToChart = 7
-//        }
-//
-//        if (daysToChart == 1) {
-//            let toDate = dateFormatter.string(from: Date())
-//            lastNEntriesArray[toDate] = 0
-//        } else {
-//            for index in 0...(daysToChart) {
-//                let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (index * -1), to: Date()) ?? Date())
-//                lastNEntriesArray[toDate] = 0
-//            }
-//        }
-//
-//        let sortedArrayKeys = Array(lastNEntriesArray.keys.sorted(by: <))
-//
-//        if (daysToChart == 1) {
-//
-//            // Charting today only
-//
-//            for indexnew in 0...(lastndays.count-1) {
-//                if(sortedArrayKeys.contains(String(lastndays[indexnew].date))){
-//                    lastNEntriesArray[String("\([lastndays.count-indexnew])")] = Int32(lastndays[indexnew].response)
-//                }
-//            }
-//        } else {
-//            for index in 0...(daysToChart) {
-//                if (lastndays.count > index) {
-//                    if(sortedArrayKeys.contains(String(lastndays[index].date))){
-//
-//                        // Logged day is within the time range to chart
-//                        // Get the response and set it as an average...
-//
-//                        let existingAvg = lastNEntriesArray[String(lastndays[index].date)] ?? 0
-//                        let indexAvg = lastndays[index].response
-//                        var newAvg = Int32(0)
-//
-//                        if existingAvg == 0 {
-//
-//                            // No existing average for the date, set the new average to this index to start calculating (if there are multiple inputs for a single day)
-//
-//                            newAvg = Int32(Int(indexAvg))
-//                        } else {
-//
-//                            // Existing average greater than zero, do some math
-//
-//                            let themath = (existingAvg + indexAvg)
-//                            newAvg = (themath / 2)
-//                        }
-//
-//                        lastNEntriesArray[String(lastndays[index].date)] = Int32(newAvg)
-//
-//                    } else {
-//
-//                        // No day logged within time range, report zero
-//
-//                        lastNEntriesArray[String(lastndays[index].date)] = 0
-//                    }
-//                }
-//            }
-//        }
+
+        if (daysToChart == 1) {
+            let toDate = dateFormatter.string(from: Date())
+            lastNEntriesArray[toDate] = 0
+        } else {
+            for index in 0...(daysToChart) {
+                let toDate = dateFormatter.string(from: Calendar.current.date(byAdding: .day, value: (index * -1), to: Date()) ?? Date())
+                lastNEntriesArray[toDate] = 0
+            }
+        }
+
+        let sortedArrayKeys = Array(lastNEntriesArray.keys.sorted(by: <))
+
+        if (daysToChart == 1) {
+
+            // Charting today only
+
+            for indexnew in 0...(lastndays.count-1) {
+                if(sortedArrayKeys.contains(String(lastndays[indexnew].date))){
+                    lastNEntriesArray[String("\([lastndays.count-indexnew])")] = Int32(lastndays[indexnew].response)
+                }
+            }
+        } else {
+            for index in 0...(daysToChart) {
+                if (lastndays.count > index) {
+                    if(sortedArrayKeys.contains(String(lastndays[index].date))){
+
+                        // Logged day is within the time range to chart
+                        // Get the response and set it as an average...
+
+                        let existingAvg = lastNEntriesArray[String(lastndays[index].date)] ?? 0
+                        let indexAvg = lastndays[index].response
+                        var newAvg = Int32(0)
+
+                        if existingAvg == 0 {
+
+                            // No existing average for the date, set the new average to this index to start calculating (if there are multiple inputs for a single day)
+
+                            newAvg = Int32(Int(indexAvg))
+                        } else {
+
+                            // Existing average greater than zero, do some math
+
+                            let themath = (existingAvg + indexAvg)
+                            newAvg = (themath / 2)
+                        }
+
+                        lastNEntriesArray[String(lastndays[index].date)] = Int32(newAvg)
+
+                    } else {
+
+                        // No day logged within time range, report zero
+
+                        lastNEntriesArray[String(lastndays[index].date)] = 0
+                    }
+                }
+            }
+        }
                 
         return ChartUIView(chartdata: lastNEntriesArray, scrollTarget: self.$scrollTarget)
     }
