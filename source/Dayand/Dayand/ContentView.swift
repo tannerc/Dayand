@@ -11,11 +11,9 @@ import CoreData
 
 struct ContentView: View {
     @State private var hovered = false
-    @Namespace var exampleNamespace
     
     @Environment(\.openURL) var openURL
     @Environment(\.managedObjectContext) var moc
-    //var moc = NSManagedObjectContext.init(concurrencyType: .privateQueueConcurrencyType)
     
     @FetchRequest(entity: Dataobject.entity(),
                   sortDescriptors:
@@ -185,12 +183,11 @@ struct ContentView: View {
     }
     
     func GetTodaysEntries() -> String {
-        
         if entries.isEmpty {
             return "0 activities"
         } else {
             var suffixString = ""
-            
+
             if entries.count == 1 {
                 suffixString = "activity"
             } else {
@@ -232,9 +229,7 @@ struct ContentView: View {
         entry.time = Int32(logTime) ?? 0
         entry.logdate = Int64(loggedTime) ?? 0
         entry.response = Int32(response)
-        if entryString.count > 0 {
-            entry.activity = entryString
-        }
+        entry.activity = entryString
         
         // Animate everything out, but do it carefully for reasons
         
@@ -320,7 +315,7 @@ struct ContentView: View {
     }
 }
 
-func GetTodaysDate() -> Int32 {
+private func GetTodaysDate() -> Int32 {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyyMMdd"
     let logDate = dateFormatter.string(from: Date())
